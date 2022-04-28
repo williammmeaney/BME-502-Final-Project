@@ -26,7 +26,7 @@ print("What is the total number of groups you have (number experimental and cont
 total=readline();
 input_group_names=[];
 number_in_group=[];
-print("You will be prompted for several group names and number of samples in each group one by one. Please go in order of the csv file you inputted. ")
+print("You will be prompted for several group names and number of samples in each group one by one. Please go in order of the csv file you inputted. \n\n")
 for i = 1:total
    print("Please state a group name.\n\n") 
    group_name_input=readline();
@@ -75,7 +75,20 @@ end
 if length(unique_group_inputs)==length(list_of_unique_groups)
     number_groups_match=true
 else
-    false
+    number_groups_match=false
+end
+
+#create array of begining and end rows for each group
+#number_in_group - holds number of samples in each Group
+# input_group_names - holds names of groups
+group_values=zeros(length(unique_group_inputs),2)
+group_values(1,1)=1;
+group_values(2,2)=number_in_group(1);
+counter=number_in_group(1);
+for i=2:length(input_group_names)
+    counter=counter+1;
+    group_values(i,1)=counter;
+    group_values(i,2)=counter+number_in_group(i+1)-1;
 end
 
 
