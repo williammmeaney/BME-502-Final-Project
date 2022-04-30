@@ -22,6 +22,17 @@ Pink_1=file_contents_matrix[:,5];
 Pink_1_Fl=Array{Float64}(Pink_1)
 
 #groups 
+
+#Determine unique categry names and number of elements in each category
+unique_categories=unique(input_group_names);
+number_unique=length(unique_categories);
+count_of_groups=ones(number_unique);
+for i=1:number_unique
+    count_of_groups(i)=count(==(unique_categories(i)), input_group_names)
+end
+
+#manual input
+#=
 print("What is the total number of groups you have (number experimental and control)\n\n");
 total=readline();
 input_group_names=[];
@@ -35,7 +46,7 @@ for i = 1:total
    number_group_input=readline();
    push!(number_in_group,nunber_group_input)
 end
-
+=#
 
 
 
@@ -77,6 +88,8 @@ if length(unique_group_inputs)==length(list_of_unique_groups)
 else
     number_groups_match=false
 end
+
+
 
 #create array of begining and end rows for each group
 #number_in_group - holds number of samples in each Group
