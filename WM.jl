@@ -5,6 +5,7 @@
 using CSV# as CV
 using DataFrames
 using Gtk
+using Statistics
 #Import
 #file_name=open_dialog("Pick a file");
 
@@ -105,3 +106,16 @@ for i=2:length(input_group_names)
 end
 
 
+
+#gausean 
+#mean and std --> percentile of (z=3) --> how many data points outside of percentile --> recalculate without outlier and 
+#recaclualte mean and STD and then see how likley it would be outside
+
+#measure how much outside by using gausean didstribution
+
+
+for i=1:number_unique
+    g_mean=average(B_actin_Fl[group_values[i,1],group_values[i,2]])
+    g_sd=stdm(g_mean,B_actin_Fl[group_values[i,1],group_values[i,2]])
+
+end
