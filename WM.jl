@@ -24,6 +24,31 @@ Pink_1_Fl=Array{Float64}(Pink_1)
 
 #groups 
 
+#Grouping
+#=#number in each group is stated upfront in fucntion ahead of time
+#validation 
+if length(unique_group_inputs)==length(list_of_unique_groups)
+    number_groups_match=true
+else
+    number_groups_match=false
+end
+=#
+
+
+#create array of begining and end rows for each group
+#number_in_group - holds number of samples in each Group
+# input_group_names - holds names of groups
+group_values=zeros(length(unique_group_inputs),2)
+group_values(1,1)=1;
+group_values(2,2)=number_in_group(1);
+counter=number_in_group(1);
+for i=2:length(input_group_names)
+    counter=counter+1;
+    group_values(i,1)=counter;
+    group_values(i,2)=counter+number_in_group(i+1)-1;
+end
+
+
 #Determine unique categry names and number of elements in each category
 unique_categories=unique(input_group_names);
 number_unique=length(unique_categories);
@@ -81,29 +106,6 @@ else
 end
 
 
-#Grouping
-#number in each group is stated upfront in fucntion ahead of time
-#validation 
-if length(unique_group_inputs)==length(list_of_unique_groups)
-    number_groups_match=true
-else
-    number_groups_match=false
-end
-
-
-
-#create array of begining and end rows for each group
-#number_in_group - holds number of samples in each Group
-# input_group_names - holds names of groups
-group_values=zeros(length(unique_group_inputs),2)
-group_values(1,1)=1;
-group_values(2,2)=number_in_group(1);
-counter=number_in_group(1);
-for i=2:length(input_group_names)
-    counter=counter+1;
-    group_values(i,1)=counter;
-    group_values(i,2)=counter+number_in_group(i+1)-1;
-end
 
 
 
@@ -113,9 +115,10 @@ end
 
 #measure how much outside by using gausean didstribution
 
-
+g_mean=[];
+g_sd=[]
 for i=1:number_unique
-    g_mean=average(B_actin_Fl[group_values[i,1],group_values[i,2]])
-    g_sd=stdm(g_mean,B_actin_Fl[group_values[i,1],group_values[i,2]])
+    push!(g_mean,average(B_actin_Fl[group_values[i,1],group_values[i,2]]))
+    push!(g_sd,stdm(g_mean,B_actin_Fl[group_values[i,1],group_values[i,2]]))
 
 end
