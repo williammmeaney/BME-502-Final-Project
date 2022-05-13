@@ -85,6 +85,9 @@ begin
 	Abs_control=grouped_trials[("C",)].Absorbance
 end
 
+# ╔═╡ e6194ff0-5439-49c8-b0d2-72e6c208df60
+B_actin_control
+
 # ╔═╡ 25d997aa-63ad-40b1-aa3f-2191268b313e
 begin
 	Pink_h2o2_100=grouped_trials[("100",)].Pink_1
@@ -148,6 +151,9 @@ begin
 	triple_max_beta_actin_values=max_beta_actin_values.*3
 end
 
+# ╔═╡ fbb43ee0-8d6a-4592-b084-01951efd5623
+triple_max_beta_actin_values[3]
+
 # ╔═╡ 1d1c58f1-e155-4dfb-bb1c-6de40123d780
 begin
 	std_pink_values=[]
@@ -181,22 +187,32 @@ end
     data ~ MvNormal(Fill(μ,length(data)),σ)
 end
 
-# ╔═╡ 1a271456-fb8a-4050-9790-1b57e8a92360
-begin
+# ╔═╡ d489b60e-4494-4fa5-8f25-9d734f630965
+begin 
 	means=[]
 	sigmas=[]
 end
 
 # ╔═╡ 9760dc4c-d579-45a4-abe6-9a5493b4062f
 function distr_det(data,index,triple_avg,double_std)
-	means=[]
-	sigmas=[]
+	#means=[]
+	#sigmas=[]
 	model1 = normal_fit(data,index,triple_avg,double_std)
 	chain = Turing.sample(model1,NUTS(0.65),1000)
 	push!(means,mean(chain[:μ]))
 	push!(sigmas,mean(chain[:σ]))
-	plot(chain)
+	#plot(chain)
+	#return means, sigmas
 end
+
+# ╔═╡ 9e7f7dba-67bf-41bb-965a-2dbf71dd10fd
+index=3
+
+# ╔═╡ 2c700738-8c62-4e9d-9a11-5462e94bb483
+temp_model=normal_fit(B_actin_h2o2_200, index, triple_max_beta_actin_values, std_double_beta_actin)
+
+# ╔═╡ 6ff70e77-c4fc-4a90-adb9-8195c785d8f4
+chain = Turing.sample(temp_model,NUTS(0.65),1000)
 
 # ╔═╡ 0aa7a06d-bc11-4a56-9a2c-780249fda01e
 function get_mu_sigma(data,index,z_abs,tripple_avg,double_std)
@@ -221,19 +237,33 @@ function create_list_of_outliers(data,index,z_abs,triple_avg,double_std)
 	return outliers
 end
 
-# ╔═╡ 1b6e7219-6bf0-4167-a32b-32c41c114ced
-outliers=[]
+# ╔═╡ 3c82fc46-2c24-4b85-bdef-99e3dbf9b85c
+begin
+	likelyhoods = []
+	area_under_curve = []
+end
 
 # ╔═╡ 65e3f7e1-b3c7-4646-918d-f1b95df3a7b7
 function MLE(data,index,triple_avg,double_std)
-	x, means, sigmas = distr_det(data,index,triple_avg,double_std)
+	means, sigmas = distr_det(data,index,triple_avg,double_std)
+	#likelyhoods=zeros(length(data))
+	#area_under_curve=zeros(length(data))
 	for j=1:length(data)
-		likelyhoods=zeros(length(data))
-		likelyhoods[j]=log(1/(sigmas[1]*sqrt(2*pi))*exp(-(data[j]-means[1])^2/(2*sigmas[1]^2)))
+		push!(likelyhoods, log(1/(sigmas[1]*sqrt(2*pi))*exp(-(data[j]-means[1])^2/(2*sigmas[1]^2))))
+		push!(area_under_curve, (1/sqrt(2*pi*sigmas[1]^2)) * exp(-(means[1]-data[j])))
 	end
-	MLE=sum(likelyhoods)
-	return MLE
+	MLE_output=sum(likelyhoods)
+	return MLE_output
 end
+
+# ╔═╡ b5722a11-3d73-45cf-a77a-274759bcbab8
+area_under_curve[2]
+
+# ╔═╡ 203dd802-c08a-463c-8d25-d749bb992b32
+MLE(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
+
+# ╔═╡ 84a76a77-ac19-4874-b37f-28ff12a9735e
+
 
 # ╔═╡ 333eaddd-ccbb-4cf4-89f1-72f7a1c178e7
 begin
@@ -1936,6 +1966,7 @@ version = "0.9.1+5"
 # ╠═ed6160be-cc82-4b98-aeec-7b053493ac7f
 # ╠═75358f9b-1545-484c-98c6-d021e358fdc2
 # ╠═bc7e2583-bef5-426f-9f9c-ca41a99159ff
+# ╠═e6194ff0-5439-49c8-b0d2-72e6c208df60
 # ╠═3874a84c-851a-4cfe-9b0e-4425148c4d79
 # ╠═25d997aa-63ad-40b1-aa3f-2191268b313e
 # ╠═a6175163-760d-476c-b0f5-a794bfb62b37
@@ -1945,17 +1976,24 @@ version = "0.9.1+5"
 # ╠═bfe19066-53b7-4e10-85f5-538095c6b392
 # ╠═85ccd5fb-34c4-4c01-afeb-6448bcc1416e
 # ╠═57be7575-1298-4a00-8ace-316af43e4c7f
+# ╠═fbb43ee0-8d6a-4592-b084-01951efd5623
 # ╠═1d1c58f1-e155-4dfb-bb1c-6de40123d780
 # ╠═e18284fc-d46e-4a74-ae26-b23cafcd2a8a
 # ╠═402c2f4f-5628-4f28-96f4-026c52d7706e
 # ╠═7f8ce4f5-0446-4405-9632-3cc85adc44d8
 # ╠═8cbf2ac8-441e-4583-b0ca-76f45c09a6dc
-# ╠═1a271456-fb8a-4050-9790-1b57e8a92360
+# ╠═d489b60e-4494-4fa5-8f25-9d734f630965
 # ╠═9760dc4c-d579-45a4-abe6-9a5493b4062f
+# ╠═9e7f7dba-67bf-41bb-965a-2dbf71dd10fd
+# ╠═2c700738-8c62-4e9d-9a11-5462e94bb483
+# ╠═6ff70e77-c4fc-4a90-adb9-8195c785d8f4
 # ╠═0aa7a06d-bc11-4a56-9a2c-780249fda01e
 # ╠═57def3b2-83dc-4dc6-821e-00313e6ef9bd
-# ╠═1b6e7219-6bf0-4167-a32b-32c41c114ced
+# ╠═3c82fc46-2c24-4b85-bdef-99e3dbf9b85c
 # ╠═65e3f7e1-b3c7-4646-918d-f1b95df3a7b7
+# ╠═b5722a11-3d73-45cf-a77a-274759bcbab8
+# ╠═203dd802-c08a-463c-8d25-d749bb992b32
+# ╠═84a76a77-ac19-4874-b37f-28ff12a9735e
 # ╠═333eaddd-ccbb-4cf4-89f1-72f7a1c178e7
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
