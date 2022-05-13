@@ -52,8 +52,28 @@ file_contents=copy(file_contents_vert)
 # ╔═╡ d0a6b97a-6010-4594-86b6-20153adae121
 file_contents_no_outliers=copy(file_contents_vert)
 
+# ╔═╡ aa1360ad-c4aa-4937-856c-6a7315269849
+begin 
+	#protein calc
+	Frequency=(file_contents[:,:Absorbance].-0.0915)./ 0.5759;
+	Concentration=Frequency.*50;
+	Protien=960 ./Concentration;
+	CL=204 .- Protien;
+	#Western Blot
+	max_b_actin=maximum(file_contents[:,:B_actin]);
+end
+
+# ╔═╡ 79bffd3c-43a5-4290-be11-29e0a8e798d2
+normalized_file_contents=copy(file_contents)
+
+# ╔═╡ ca127646-0943-491c-9d71-a7775deda2fd
+normalized_file_contents[:,:B_actin]=normalized_file_contents[:,:B_actin]/max_b_actin
+
+# ╔═╡ ed6160be-cc82-4b98-aeec-7b053493ac7f
+normalized_file_contents
+
 # ╔═╡ 75358f9b-1545-484c-98c6-d021e358fdc2
-grouped_trials=groupby(file_contents,:SampleType)
+grouped_trials=groupby(normalized_file_contents,:SampleType)
 
 # ╔═╡ bc7e2583-bef5-426f-9f9c-ca41a99159ff
 size(grouped_trials)
@@ -161,8 +181,16 @@ end
     data ~ MvNormal(Fill(μ,length(data)),σ)
 end
 
+# ╔═╡ 1a271456-fb8a-4050-9790-1b57e8a92360
+begin
+	means=[]
+	sigmas=[]
+end
+
 # ╔═╡ 9760dc4c-d579-45a4-abe6-9a5493b4062f
 function distr_det(data,index,triple_avg,double_std)
+	means=[]
+	sigmas=[]
 	model1 = normal_fit(data,index,triple_avg,double_std)
 	chain = Turing.sample(model1,NUTS(0.65),1000)
 	push!(means,mean(chain[:μ]))
@@ -172,20 +200,18 @@ end
 
 # ╔═╡ 0aa7a06d-bc11-4a56-9a2c-780249fda01e
 function get_mu_sigma(data,index,z_abs,tripple_avg,double_std)
-	means=[]
-	sigmas=[]
 	distr_det(data,index,triple_avg,double_std)
 	z=[-z_abs,z_abs]
 	x=z.*sigmas[1].+means[1]
 	plot(Normal(means[1],sigmas[1]))
 	pos_cutoff=	erf(z[2]/sqrt(2)/2)
 	neg_cutoff=1-pos_cutoff
-	return x
+	return x, means, sigmas
 end
 
 # ╔═╡ 57def3b2-83dc-4dc6-821e-00313e6ef9bd
 function create_list_of_outliers(data,index,z_abs,triple_avg,double_std)
-	x=get_mu_sigma(data,index,z_abs,triple_avg,double_std)
+	x, means, sigmas =get_mu_sigma(data,index,z_abs,triple_avg,double_std)
 	outliers=[]
 	for i=1:length(data)
 		if (data[i]>x[2])||(data[i]<x[1])
@@ -195,11 +221,25 @@ function create_list_of_outliers(data,index,z_abs,triple_avg,double_std)
 	return outliers
 end
 
+# ╔═╡ 1b6e7219-6bf0-4167-a32b-32c41c114ced
+outliers=[]
+
+# ╔═╡ 65e3f7e1-b3c7-4646-918d-f1b95df3a7b7
+function MLE(data,index,triple_avg,double_std)
+	x, means, sigmas = distr_det(data,index,triple_avg,double_std)
+	for j=1:length(data)
+		likelyhoods=zeros(length(data))
+		likelyhoods[j]=log(1/(sigmas[1]*sqrt(2*pi))*exp(-(data[j]-means[1])^2/(2*sigmas[1]^2)))
+	end
+	MLE=sum(likelyhoods)
+	return MLE
+end
+
 # ╔═╡ 333eaddd-ccbb-4cf4-89f1-72f7a1c178e7
 begin
-	c_beta_actin_outliers=create_list_of_outliers(B_actin_control)
-	h2o2_100_beta_actin_outliers=create_list_of_outliers(B_actin_h2o2_100)
-	h2o2_200_beta_actin_outliers=create_list_of_outliers(B_actin_h2o2_200)
+	c_beta_actin_outliers=list_outliers(B_actin_control)
+	h2o2_100_beta_actin_outliers=list_outliers(B_actin_h2o2_100)
+	h2o2_200_beta_actin_outliers=list_outliers(B_actin_h2o2_200)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1890,6 +1930,10 @@ version = "0.9.1+5"
 # ╠═16692ff5-3092-4eed-966e-d3fd6f5e8821
 # ╠═30482cda-e17a-422a-ae59-182913bc5276
 # ╠═d0a6b97a-6010-4594-86b6-20153adae121
+# ╠═aa1360ad-c4aa-4937-856c-6a7315269849
+# ╠═79bffd3c-43a5-4290-be11-29e0a8e798d2
+# ╠═ca127646-0943-491c-9d71-a7775deda2fd
+# ╠═ed6160be-cc82-4b98-aeec-7b053493ac7f
 # ╠═75358f9b-1545-484c-98c6-d021e358fdc2
 # ╠═bc7e2583-bef5-426f-9f9c-ca41a99159ff
 # ╠═3874a84c-851a-4cfe-9b0e-4425148c4d79
@@ -1906,9 +1950,12 @@ version = "0.9.1+5"
 # ╠═402c2f4f-5628-4f28-96f4-026c52d7706e
 # ╠═7f8ce4f5-0446-4405-9632-3cc85adc44d8
 # ╠═8cbf2ac8-441e-4583-b0ca-76f45c09a6dc
+# ╠═1a271456-fb8a-4050-9790-1b57e8a92360
 # ╠═9760dc4c-d579-45a4-abe6-9a5493b4062f
 # ╠═0aa7a06d-bc11-4a56-9a2c-780249fda01e
 # ╠═57def3b2-83dc-4dc6-821e-00313e6ef9bd
+# ╠═1b6e7219-6bf0-4167-a32b-32c41c114ced
+# ╠═65e3f7e1-b3c7-4646-918d-f1b95df3a7b7
 # ╠═333eaddd-ccbb-4cf4-89f1-72f7a1c178e7
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
