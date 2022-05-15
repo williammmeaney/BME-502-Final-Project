@@ -15,6 +15,7 @@ begin
 	using FillArrays
 	using SpecialFunctions
 	using Distributions
+	using HypothesisTests
 end
 
 # ╔═╡ 8c9a9d91-5b09-4b20-b29b-310b9d4aac87
@@ -316,8 +317,15 @@ function remove_data_below_threshold(data,index,triple_avg,double_std,threshold)
 	push!(MLE_outputs_after_below_threshold, MLE_output)
 end
 
+# ╔═╡ e4a5c1b8-1205-499f-8431-438e4990ff1b
+#=
+These results show us that removing the first data point gives us the highest maximum likelihood estimation. The higher the MLE, the better the fit of the data.Thus we qualify data point one from the 200uM experimental group as an outlier.
+=#
+
 # ╔═╡ 0dc34623-9727-4248-8a79-61816a56daf7
 function remove_each_data_point_ind(data,index,triple_avg,double_std)
+	likleyhoods_after_each_data_is_removed=[]
+	MLE_outputs_after_each_data_is_removed=[]
 	MLE_output, likelyhoods, means= MLE(data,index,triple_avg,double_std)
 	for i=1:length(likelyhoods)
 		temp_data=[];
@@ -332,6 +340,7 @@ function remove_each_data_point_ind(data,index,triple_avg,double_std)
 		push!(likleyhoods_after_each_data_is_removed, likelyhoods)
 		push!(MLE_outputs_after_each_data_is_removed, MLE_output)
 	end
+	return likleyhoods_after_each_data_is_removed, MLE_outputs_after_each_data_is_removed
 end
 
 # ╔═╡ 203dd802-c08a-463c-8d25-d749bb992b32
@@ -357,39 +366,80 @@ MLE_outputs_after_each_data_is_removed
 
 # ╔═╡ 59fc0870-43ef-43d8-be26-80d02b8553c0
 function get_final_data_set(b_actin_data,pink_data,index,triple_avg,double_std)
-	likleyhoods_after_each_data_is_removed=[]
-	MLE_outputs_after_each_data_is_removed=[]
-	remove_each_data_point_ind(b_actin_data,index,triple_avg,double_std)
+	likleyhoods_after_each_data_is_removed, MLE_outputs_after_each_data_is_removed =remove_each_data_point_ind(b_actin_data,index,triple_avg,double_std)
 	mean_MLE=mean(MLE_outputs_after_each_data_is_removed);
 	index_to_remove=[]
 	new_b_actin_data=copy(b_actin_data)
 	new_pink_data=copy(pink_data)
 	for k=1:length(MLE_outputs_after_each_data_is_removed)
 		if MLE_outputs_after_each_data_is_removed[k]>2*mean_MLE
-			deleteat!(new_b_actin_data,i)
-			deleteat!(new_pink_data,i)
+			deleteat!(new_b_actin_data,k)
+			deleteat!(new_pink_data,k)
 		end
 	end
 	return new_b_actin_data,new_pink_data
 end
 
-# ╔═╡ e4a5c1b8-1205-499f-8431-438e4990ff1b
-#=
-These results show us that removing the first data point gives us the highest maximum likelihood estimation. The higher the MLE, the better the fit of the data.Thus we qualify data point one from the 200uM experimental group as an outlier.
-
-=#
-
 # ╔═╡ 3cda4ea0-e825-48ae-a93a-74fb802784d4
 MLE_outputs_after_below_threshold
 
 # ╔═╡ f6d39e0a-2598-46f4-b285-006ed5dba4e5
+OneSampleTTest(Pink_control, new_pink_data)
 
+# ╔═╡ 7f127393-c491-42eb-8097-fe11f4530b62
+UnequalVarianceTTest(Pink_control, new_pink_data)
+
+# ╔═╡ 987a3631-dcc0-44c6-ac58-fd55eab95848
+#= 
+We attempted to code a Bayesian test for significance but after questionable success we decided to add in this t-test as an alternative approach to determining significance. Running the test with experimental group 1 and 2 both show no statistical difference between them, but we are wary of these results as there seems to be a large increase in Pink-1 expression in the 200uM experimental group.
+=#
+
+# ╔═╡ 4adfa5ae-f4bd-44f7-983b-ea7a1e24de53
+Pink_control
+
+# ╔═╡ 90ee9872-8679-465f-991c-d575ff3d2708
+Pink_h2o2_100
 
 # ╔═╡ 333eaddd-ccbb-4cf4-89f1-72f7a1c178e7
 begin
 	c_beta_actin_outliers=list_outliers(B_actin_control)
 	h2o2_100_beta_actin_outliers=list_outliers(B_actin_h2o2_100)
 	h2o2_200_beta_actin_outliers=list_outliers(B_actin_h2o2_200)
+end
+
+# ╔═╡ 90fb2704-de9a-4026-9826-1f09de08fc64
+@model function normal_fit_no_index(data,triple_avg,double_std)
+	μ ~ Uniform(0,triple_avg)
+	σ ~ Uniform(0,double_std)
+    data ~ MvNormal(Fill(μ,length(data)),σ)
+end
+
+# ╔═╡ 2d0d20d1-4bac-4555-a513-c12ef9103fa6
+function distr_det_no_index(data,index,triple_avg,double_std)
+	means=[]
+	sigmas=[]
+	#=if index==1
+		avg = triple_avg[1]
+		std = double_std[1]
+	else =#
+		max1 = 3* maximum(data)
+		sd1 = 2*std(data)
+	#end
+	model1 = normal_fit_no_index(data,max1,sd1)
+	chain = Turing.sample(model1,NUTS(0.65),1000)
+	means=mean(chain[:μ])
+	sigmas=mean(chain[:σ])
+	#plot(chain)
+	return means, sigmas
+end
+
+# ╔═╡ 187c037f-8fa2-4b92-a907-0a8708f9f769
+means_pink,sigma_pink=distr_det_no_index(Pink_control,1,triple_max_pink_values, std_double_pink)
+
+# ╔═╡ 5c98cfae-91fb-40d5-a8d9-fb8791ff3745
+begin
+	beta,pink= get_final_data_set(B_actin_h2o2_100,Pink_h2o2_100,2,triple_max_beta_actin_values,std_double_beta_actin)
+	means_100,sigma_100=distr_det_no_index(pink,2,triple_max_pink_values, std_double_pink)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -400,6 +450,7 @@ DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
 Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
+HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 StatsPlots = "f3b207a7-027a-5e70-b257-86293d7955fd"
@@ -411,6 +462,7 @@ DataFrames = "~1.3.4"
 Distributions = "~0.25.58"
 FillArrays = "~0.13.2"
 Gtk = "~1.2.1"
+HypothesisTests = "~0.10.10"
 SpecialFunctions = "~2.1.4"
 StatsPlots = "~0.14.34"
 Turing = "~0.21.2"
@@ -968,6 +1020,12 @@ deps = ["DualNumbers", "LinearAlgebra", "SpecialFunctions", "Test"]
 git-tree-sha1 = "65e4589030ef3c44d3b90bdc5aac462b4bb05567"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.8"
+
+[[HypothesisTests]]
+deps = ["Combinatorics", "Distributions", "LinearAlgebra", "Random", "Rmath", "Roots", "Statistics", "StatsBase"]
+git-tree-sha1 = "10b23fc711999d34f6888ab6df4c510def193fd9"
+uuid = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
+version = "0.10.10"
 
 [[IRTools]]
 deps = ["InteractiveUtils", "MacroTools", "Test"]
@@ -2116,6 +2174,7 @@ version = "0.9.1+5"
 # ╠═73f99cba-508d-45da-ac8c-738a113f186d
 # ╠═1da71409-b93f-4375-85a7-56f8ed09a314
 # ╠═e6b7b322-d8a9-41ba-b799-8f1d0eeaa075
+# ╠═e4a5c1b8-1205-499f-8431-438e4990ff1b
 # ╠═0dc34623-9727-4248-8a79-61816a56daf7
 # ╠═203dd802-c08a-463c-8d25-d749bb992b32
 # ╠═4734d206-480a-48c5-b45e-01ef0984ca03
@@ -2125,9 +2184,16 @@ version = "0.9.1+5"
 # ╠═04103081-572e-48b7-ad32-01711279c9b1
 # ╠═50ebf49d-1fd2-4578-95c7-0054d8a2a5be
 # ╠═59fc0870-43ef-43d8-be26-80d02b8553c0
-# ╠═e4a5c1b8-1205-499f-8431-438e4990ff1b
 # ╠═3cda4ea0-e825-48ae-a93a-74fb802784d4
 # ╠═f6d39e0a-2598-46f4-b285-006ed5dba4e5
+# ╠═7f127393-c491-42eb-8097-fe11f4530b62
+# ╠═987a3631-dcc0-44c6-ac58-fd55eab95848
+# ╠═4adfa5ae-f4bd-44f7-983b-ea7a1e24de53
+# ╠═90ee9872-8679-465f-991c-d575ff3d2708
 # ╠═333eaddd-ccbb-4cf4-89f1-72f7a1c178e7
+# ╠═90fb2704-de9a-4026-9826-1f09de08fc64
+# ╠═2d0d20d1-4bac-4555-a513-c12ef9103fa6
+# ╠═187c037f-8fa2-4b92-a907-0a8708f9f769
+# ╠═5c98cfae-91fb-40d5-a8d9-fb8791ff3745
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
