@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.18.0
+# v0.19.4
 
 using Markdown
 using InteractiveUtils
@@ -14,31 +14,53 @@ begin
 	using StatsPlots
 	using FillArrays
 	using SpecialFunctions
+	using Distributions
 end
 
 # ╔═╡ 8c9a9d91-5b09-4b20-b29b-310b9d4aac87
+# ╠═╡ disabled = true
+#=╠═╡
 function string_as_varname(s::String,v::Any)
          s=Symbol(s)
          @eval (($s) = ($v))
 end
+  ╠═╡ =#
 
 # ╔═╡ 9ded67cd-5e48-484e-b802-2349412357d7
+# ╠═╡ disabled = true
+#=╠═╡
 Symbol("sample")
+  ╠═╡ =#
 
 # ╔═╡ 3c1e18dc-1f18-48db-a2d2-32cd5938a21c
+# ╠═╡ disabled = true
+#=╠═╡
 @eval ($:sample=7)
+  ╠═╡ =#
 
 # ╔═╡ 417d35d8-f95e-49f1-b190-b4e32c2347e0
+# ╠═╡ disabled = true
+#=╠═╡
 test_string="abc123"
+  ╠═╡ =#
 
 # ╔═╡ 053dbf13-a93d-4bff-aa26-7164c034c145
+# ╠═╡ disabled = true
+#=╠═╡
 :test_string
+  ╠═╡ =#
 
 # ╔═╡ 11567af4-16b1-4e42-a142-da20324d54d9
+# ╠═╡ disabled = true
+#=╠═╡
 @eval($:string(abc123)=8)
+  ╠═╡ =#
 
 # ╔═╡ 0217024b-5160-4272-89f8-ddee02d53efe
+# ╠═╡ disabled = true
+#=╠═╡
 sample
+  ╠═╡ =#
 
 # ╔═╡ e7ee19e2-beb9-4da6-9a18-25834f3e47d2
 file_contents_vert=CSV.read("C:\\Users\\willi\\OneDrive - Stony Brook University\\Courses\\Undergraduate\\Senior Year\\BME 502\\GitHub\\BME-502-Final-Project\\DataForFinal_vert.csv", DataFrame);
@@ -68,6 +90,9 @@ normalized_file_contents=copy(file_contents)
 
 # ╔═╡ ca127646-0943-491c-9d71-a7775deda2fd
 normalized_file_contents[:,:B_actin]=normalized_file_contents[:,:B_actin]/max_b_actin
+
+# ╔═╡ 018ae366-7319-4a45-9692-5bcc6ced8f47
+normalized_file_contents[:,:Pink_1]=normalized_file_contents[:,:B_actin].*normalized_file_contents[:,:Pink_1]
 
 # ╔═╡ ed6160be-cc82-4b98-aeec-7b053493ac7f
 normalized_file_contents
@@ -188,21 +213,24 @@ end
 end
 
 # ╔═╡ d489b60e-4494-4fa5-8f25-9d734f630965
+# ╠═╡ disabled = true
+#=╠═╡
 begin 
 	means=[]
 	sigmas=[]
 end
+  ╠═╡ =#
 
 # ╔═╡ 9760dc4c-d579-45a4-abe6-9a5493b4062f
 function distr_det(data,index,triple_avg,double_std)
-	#means=[]
-	#sigmas=[]
+	means=[]
+	sigmas=[]
 	model1 = normal_fit(data,index,triple_avg,double_std)
 	chain = Turing.sample(model1,NUTS(0.65),1000)
-	push!(means,mean(chain[:μ]))
-	push!(sigmas,mean(chain[:σ]))
+	means=mean(chain[:μ])
+	sigmas=mean(chain[:σ])
 	#plot(chain)
-	#return means, sigmas
+	return means, sigmas
 end
 
 # ╔═╡ 9e7f7dba-67bf-41bb-965a-2dbf71dd10fd
@@ -216,7 +244,7 @@ chain = Turing.sample(temp_model,NUTS(0.65),1000)
 
 # ╔═╡ 0aa7a06d-bc11-4a56-9a2c-780249fda01e
 function get_mu_sigma(data,index,z_abs,tripple_avg,double_std)
-	distr_det(data,index,triple_avg,double_std)
+	means, sigmas=distr_det(data,index,triple_avg,double_std)
 	z=[-z_abs,z_abs]
 	x=z.*sigmas[1].+means[1]
 	plot(Normal(means[1],sigmas[1]))
@@ -237,32 +265,124 @@ function create_list_of_outliers(data,index,z_abs,triple_avg,double_std)
 	return outliers
 end
 
-# ╔═╡ 3c82fc46-2c24-4b85-bdef-99e3dbf9b85c
-begin
-	likelyhoods = []
-	area_under_curve = []
-end
-
 # ╔═╡ 65e3f7e1-b3c7-4646-918d-f1b95df3a7b7
 function MLE(data,index,triple_avg,double_std)
 	means, sigmas = distr_det(data,index,triple_avg,double_std)
-	#likelyhoods=zeros(length(data))
-	#area_under_curve=zeros(length(data))
+	likelyhoods=zeros(length(data))
+	area_under_curve=zeros(length(data))
 	for j=1:length(data)
-		push!(likelyhoods, log(1/(sigmas[1]*sqrt(2*pi))*exp(-(data[j]-means[1])^2/(2*sigmas[1]^2))))
-		push!(area_under_curve, (1/sqrt(2*pi*sigmas[1]^2)) * exp(-(means[1]-data[j])))
+		likelyhoods[j]= log(1/(sigmas[1]*sqrt(2*pi))*exp(-(data[j]-means[1])^2/(2*sigmas[1]^2)))
+		area_under_curve[j]= (1/sqrt(2*pi*sigmas[1]^2)) * exp(-(means[1]-data[j]))
 	end
 	MLE_output=sum(likelyhoods)
-	return MLE_output
+	return MLE_output, likelyhoods, means
 end
 
-# ╔═╡ b5722a11-3d73-45cf-a77a-274759bcbab8
-area_under_curve[2]
+# ╔═╡ 73f99cba-508d-45da-ac8c-738a113f186d
+begin
+	#likleyhoods_after_each_data_is_removed=[]
+	#MLE_outputs_after_each_data_is_removed=[]
+	likleyhoods_after_below_threshold=[]
+	MLE_outputs_after_below_threshold=[]	
+end
+
+# ╔═╡ 1da71409-b93f-4375-85a7-56f8ed09a314
+#=
+	The function remove_data_below_threshold examines the likelihood of each data point in a set. If the likeleihood is below 5%, the data point will be removed and a new maximum likelihood estimation will be calculated. If there are multiple data points under this threshold then all of those ppints will be removed.
+
+	The function remove_each_data_point_ind does the same thing as the previous function, but without any regard for a threshold. Instead this will help us see if there are any points within our dataset that don't qualify as "outliers" but still have a significiant impact on our data.  Note, this is evaluated one at a time so multiple data points will not be removed at once 
+=#
+
+# ╔═╡ e6b7b322-d8a9-41ba-b799-8f1d0eeaa075
+function remove_data_below_threshold(data,index,triple_avg,double_std,threshold)
+	MLE_output, likelyhoods, means= MLE(data,index,triple_avg,double_std)
+	new_data=[]
+	for i=1:length(likelyhoods)
+		temp_data=[];
+		temp_data=copy(data)
+		MLE_output, likelyhoods, means= MLE(temp_data,index,triple_avg,double_std)
+		exp_likelyhoods=exp.(likelyhoods)
+		if exp_likelyhoods[i]<threshold#should be .05
+			deleteat!(temp_data,i)
+		end
+		new_data=copy(temp_data)
+	end
+	triple_avg_new=zeros(index)
+	double_std_new=zeros(index)
+	triple_avg_new[index]=3*maximum(new_data)
+	double_std_new[index]=2*std(new_data)
+	MLE_output, likelyhoods, means= MLE(new_data,index,triple_avg_new,double_std_new)
+	push!(likleyhoods_after_below_threshold, likelyhoods)
+	push!(MLE_outputs_after_below_threshold, MLE_output)
+end
+
+# ╔═╡ 0dc34623-9727-4248-8a79-61816a56daf7
+function remove_each_data_point_ind(data,index,triple_avg,double_std)
+	MLE_output, likelyhoods, means= MLE(data,index,triple_avg,double_std)
+	for i=1:length(likelyhoods)
+		temp_data=[];
+		temp_data=copy(data)
+		MLE_output, likelyhoods, means= MLE(temp_data,index,triple_avg,double_std)
+		deleteat!(temp_data,i)
+		triple_avg_new=zeros(index)
+		double_std_new=zeros(index)
+		triple_avg_new[index]=3*maximum(temp_data)
+		double_std_new[index]=2*std(temp_data)	
+		MLE_output, likelyhoods, means= MLE(temp_data,index,triple_avg_new,double_std_new)
+		push!(likleyhoods_after_each_data_is_removed, likelyhoods)
+		push!(MLE_outputs_after_each_data_is_removed, MLE_output)
+	end
+end
 
 # ╔═╡ 203dd802-c08a-463c-8d25-d749bb992b32
 MLE(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
 
+# ╔═╡ 4734d206-480a-48c5-b45e-01ef0984ca03
+triple_max_beta_actin_values
+
 # ╔═╡ 84a76a77-ac19-4874-b37f-28ff12a9735e
+ remove_data_below_threshold(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin,0.05)
+
+# ╔═╡ 4c1ee6c9-ecac-4a55-bae5-aac10522da26
+exp.(likleyhoods_after_below_threshold[1])
+
+# ╔═╡ c0baeace-61a1-4c71-9860-1c1b47b85575
+ remove_each_data_point_ind(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
+
+# ╔═╡ 04103081-572e-48b7-ad32-01711279c9b1
+MLE_outputs_after_each_data_is_removed
+
+# ╔═╡ 50ebf49d-1fd2-4578-95c7-0054d8a2a5be
+[1.5, 2, 2.5].*mean(MLE_outputs_after_each_data_is_removed)
+
+# ╔═╡ 59fc0870-43ef-43d8-be26-80d02b8553c0
+function get_final_data_set(b_actin_data,pink_data,index,triple_avg,double_std)
+	likleyhoods_after_each_data_is_removed=[]
+	MLE_outputs_after_each_data_is_removed=[]
+	remove_each_data_point_ind(b_actin_data,index,triple_avg,double_std)
+	mean_MLE=mean(MLE_outputs_after_each_data_is_removed);
+	index_to_remove=[]
+	new_b_actin_data=copy(b_actin_data)
+	new_pink_data=copy(pink_data)
+	for k=1:length(MLE_outputs_after_each_data_is_removed)
+		if MLE_outputs_after_each_data_is_removed[k]>2*mean_MLE
+			deleteat!(new_b_actin_data,i)
+			deleteat!(new_pink_data,i)
+		end
+	end
+	return new_b_actin_data,new_pink_data
+end
+
+# ╔═╡ e4a5c1b8-1205-499f-8431-438e4990ff1b
+#=
+These results show us that removing the first data point gives us the highest maximum likelihood estimation. The higher the MLE, the better the fit of the data.Thus we qualify data point one from the 200uM experimental group as an outlier.
+
+=#
+
+# ╔═╡ 3cda4ea0-e825-48ae-a93a-74fb802784d4
+MLE_outputs_after_below_threshold
+
+# ╔═╡ f6d39e0a-2598-46f4-b285-006ed5dba4e5
 
 
 # ╔═╡ 333eaddd-ccbb-4cf4-89f1-72f7a1c178e7
@@ -277,6 +397,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
 Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
@@ -287,6 +408,7 @@ Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"
 [compat]
 CSV = "~0.10.4"
 DataFrames = "~1.3.4"
+Distributions = "~0.25.58"
 FillArrays = "~0.13.2"
 Gtk = "~1.2.1"
 SpecialFunctions = "~2.1.4"
@@ -1963,6 +2085,7 @@ version = "0.9.1+5"
 # ╠═aa1360ad-c4aa-4937-856c-6a7315269849
 # ╠═79bffd3c-43a5-4290-be11-29e0a8e798d2
 # ╠═ca127646-0943-491c-9d71-a7775deda2fd
+# ╠═018ae366-7319-4a45-9692-5bcc6ced8f47
 # ╠═ed6160be-cc82-4b98-aeec-7b053493ac7f
 # ╠═75358f9b-1545-484c-98c6-d021e358fdc2
 # ╠═bc7e2583-bef5-426f-9f9c-ca41a99159ff
@@ -1989,11 +2112,22 @@ version = "0.9.1+5"
 # ╠═6ff70e77-c4fc-4a90-adb9-8195c785d8f4
 # ╠═0aa7a06d-bc11-4a56-9a2c-780249fda01e
 # ╠═57def3b2-83dc-4dc6-821e-00313e6ef9bd
-# ╠═3c82fc46-2c24-4b85-bdef-99e3dbf9b85c
 # ╠═65e3f7e1-b3c7-4646-918d-f1b95df3a7b7
-# ╠═b5722a11-3d73-45cf-a77a-274759bcbab8
+# ╠═73f99cba-508d-45da-ac8c-738a113f186d
+# ╠═1da71409-b93f-4375-85a7-56f8ed09a314
+# ╠═e6b7b322-d8a9-41ba-b799-8f1d0eeaa075
+# ╠═0dc34623-9727-4248-8a79-61816a56daf7
 # ╠═203dd802-c08a-463c-8d25-d749bb992b32
+# ╠═4734d206-480a-48c5-b45e-01ef0984ca03
 # ╠═84a76a77-ac19-4874-b37f-28ff12a9735e
+# ╠═4c1ee6c9-ecac-4a55-bae5-aac10522da26
+# ╠═c0baeace-61a1-4c71-9860-1c1b47b85575
+# ╠═04103081-572e-48b7-ad32-01711279c9b1
+# ╠═50ebf49d-1fd2-4578-95c7-0054d8a2a5be
+# ╠═59fc0870-43ef-43d8-be26-80d02b8553c0
+# ╠═e4a5c1b8-1205-499f-8431-438e4990ff1b
+# ╠═3cda4ea0-e825-48ae-a93a-74fb802784d4
+# ╠═f6d39e0a-2598-46f4-b285-006ed5dba4e5
 # ╠═333eaddd-ccbb-4cf4-89f1-72f7a1c178e7
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
