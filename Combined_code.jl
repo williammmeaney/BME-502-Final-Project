@@ -436,10 +436,22 @@ end
 # ╔═╡ 187c037f-8fa2-4b92-a907-0a8708f9f769
 means_pink,sigma_pink=distr_det_no_index(Pink_control,1,triple_max_pink_values, std_double_pink)
 
+# ╔═╡ 285020d8-7fb6-4077-8ea9-cdc6f858db1d
+begin
+	beta_c,pink_c= get_final_data_set(B_actin_control,Pink_control,1,triple_max_beta_actin_values,std_double_beta_actin)
+	means_c,sigma_c=distr_det_no_index(pink_c,1,triple_max_pink_values, std_double_pink)
+end
+
 # ╔═╡ 5c98cfae-91fb-40d5-a8d9-fb8791ff3745
 begin
-	beta,pink= get_final_data_set(B_actin_h2o2_100,Pink_h2o2_100,2,triple_max_beta_actin_values,std_double_beta_actin)
-	means_100,sigma_100=distr_det_no_index(pink,2,triple_max_pink_values, std_double_pink)
+	beta_100,pink_100= get_final_data_set(B_actin_h2o2_100,Pink_h2o2_100,2,triple_max_beta_actin_values,std_double_beta_actin)
+	means_100,sigma_100=distr_det_no_index(pink_100,2,triple_max_pink_values, std_double_pink)
+end
+
+# ╔═╡ 4f09e31b-ebf5-4658-8db6-93aae7fb23a8
+begin
+	beta_200,pink_200= get_final_data_set(B_actin_h2o2_200,Pink_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
+	means_200,sigma_200=distr_det_no_index(pink_200,3,triple_max_pink_values, std_double_pink)
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -2194,6 +2206,8 @@ version = "0.9.1+5"
 # ╠═90fb2704-de9a-4026-9826-1f09de08fc64
 # ╠═2d0d20d1-4bac-4555-a513-c12ef9103fa6
 # ╠═187c037f-8fa2-4b92-a907-0a8708f9f769
+# ╠═285020d8-7fb6-4077-8ea9-cdc6f858db1d
 # ╠═5c98cfae-91fb-40d5-a8d9-fb8791ff3745
+# ╠═4f09e31b-ebf5-4658-8db6-93aae7fb23a8
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
