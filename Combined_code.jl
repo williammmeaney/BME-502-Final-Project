@@ -433,7 +433,9 @@ begin
 end
 
 # ╔═╡ 5fb0ccee-0605-4a05-b828-7d18da1170a4
-
+function mean_diff_dist(mu_1, sigma_1, mu_2, sigma_2)
+	mean_diff = Normal(mu_1, sigma_1) - Normal(mu_2, sigma_2)
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
