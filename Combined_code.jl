@@ -26,46 +26,47 @@ The following cells before the csv import cells are attempts at metaprogramming 
 # ╔═╡ 8c9a9d91-5b09-4b20-b29b-310b9d4aac87
 # ╠═╡ disabled = true
 #=╠═╡
-function string_as_varname(s::String,v::Any)
+#=function string_as_varname(s::String,v::Any)
          s=Symbol(s)
          @eval (($s) = ($v))
 end
+=#
   ╠═╡ =#
 
 # ╔═╡ 9ded67cd-5e48-484e-b802-2349412357d7
 # ╠═╡ disabled = true
 #=╠═╡
-Symbol("sample")
+#Symbol("sample")
   ╠═╡ =#
 
 # ╔═╡ 3c1e18dc-1f18-48db-a2d2-32cd5938a21c
 # ╠═╡ disabled = true
 #=╠═╡
-@eval ($:sample=7)
+#@eval ($:sample=7)
   ╠═╡ =#
 
 # ╔═╡ 417d35d8-f95e-49f1-b190-b4e32c2347e0
 # ╠═╡ disabled = true
 #=╠═╡
-test_string="abc123"
+#test_string="abc123"
   ╠═╡ =#
 
 # ╔═╡ 053dbf13-a93d-4bff-aa26-7164c034c145
 # ╠═╡ disabled = true
 #=╠═╡
-:test_string
+#:test_string
   ╠═╡ =#
 
 # ╔═╡ 11567af4-16b1-4e42-a142-da20324d54d9
 # ╠═╡ disabled = true
 #=╠═╡
-@eval($:string(abc123)=8)
+#@eval($:string(abc123)=8)
   ╠═╡ =#
 
 # ╔═╡ 0217024b-5160-4272-89f8-ddee02d53efe
 # ╠═╡ disabled = true
 #=╠═╡
-sample
+#sample
   ╠═╡ =#
 
 # ╔═╡ e7ee19e2-beb9-4da6-9a18-25834f3e47d2
