@@ -18,6 +18,11 @@ begin
 	using HypothesisTests
 end
 
+# ╔═╡ 4861f327-812a-4cc1-9340-9196743b1e0f
+#=
+The following cells before the csv import cells are attempts at metaprogramming - to dynamically create variables from the contents of a string
+=#
+
 # ╔═╡ 8c9a9d91-5b09-4b20-b29b-310b9d4aac87
 # ╠═╡ disabled = true
 #=╠═╡
@@ -213,15 +218,6 @@ end
     data ~ MvNormal(Fill(μ,length(data)),σ)
 end
 
-# ╔═╡ d489b60e-4494-4fa5-8f25-9d734f630965
-# ╠═╡ disabled = true
-#=╠═╡
-begin 
-	means=[]
-	sigmas=[]
-end
-  ╠═╡ =#
-
 # ╔═╡ 9760dc4c-d579-45a4-abe6-9a5493b4062f
 function distr_det(data,index,triple_avg,double_std)
 	means=[]
@@ -346,9 +342,6 @@ end
 # ╔═╡ 203dd802-c08a-463c-8d25-d749bb992b32
 MLE(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
 
-# ╔═╡ 4734d206-480a-48c5-b45e-01ef0984ca03
-triple_max_beta_actin_values
-
 # ╔═╡ 84a76a77-ac19-4874-b37f-28ff12a9735e
  remove_data_below_threshold(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin,0.05)
 
@@ -357,12 +350,6 @@ exp.(likleyhoods_after_below_threshold[1])
 
 # ╔═╡ c0baeace-61a1-4c71-9860-1c1b47b85575
  remove_each_data_point_ind(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
-
-# ╔═╡ 04103081-572e-48b7-ad32-01711279c9b1
-MLE_outputs_after_each_data_is_removed
-
-# ╔═╡ 50ebf49d-1fd2-4578-95c7-0054d8a2a5be
-[1.5, 2, 2.5].*mean(MLE_outputs_after_each_data_is_removed)
 
 # ╔═╡ 59fc0870-43ef-43d8-be26-80d02b8553c0
 function get_final_data_set(b_actin_data,pink_data,index,triple_avg,double_std)
@@ -400,13 +387,6 @@ Pink_control
 # ╔═╡ 90ee9872-8679-465f-991c-d575ff3d2708
 Pink_h2o2_100
 
-# ╔═╡ 333eaddd-ccbb-4cf4-89f1-72f7a1c178e7
-begin
-	c_beta_actin_outliers=list_outliers(B_actin_control)
-	h2o2_100_beta_actin_outliers=list_outliers(B_actin_h2o2_100)
-	h2o2_200_beta_actin_outliers=list_outliers(B_actin_h2o2_200)
-end
-
 # ╔═╡ 90fb2704-de9a-4026-9826-1f09de08fc64
 @model function normal_fit_no_index(data,triple_avg,double_std)
 	μ ~ Uniform(0,triple_avg)
@@ -433,9 +413,6 @@ function distr_det_no_index(data,index,triple_avg,double_std)
 	return means, sigmas
 end
 
-# ╔═╡ 187c037f-8fa2-4b92-a907-0a8708f9f769
-means_pink,sigma_pink=distr_det_no_index(Pink_control,1,triple_max_pink_values, std_double_pink)
-
 # ╔═╡ 285020d8-7fb6-4077-8ea9-cdc6f858db1d
 begin
 	beta_c,pink_c= get_final_data_set(B_actin_control,Pink_control,1,triple_max_beta_actin_values,std_double_beta_actin)
@@ -453,6 +430,9 @@ begin
 	beta_200,pink_200= get_final_data_set(B_actin_h2o2_200,Pink_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
 	means_200,sigma_200=distr_det_no_index(pink_200,3,triple_max_pink_values, std_double_pink)
 end
+
+# ╔═╡ 5fb0ccee-0605-4a05-b828-7d18da1170a4
+
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2141,6 +2121,7 @@ version = "0.9.1+5"
 
 # ╔═╡ Cell order:
 # ╠═b386b080-d22e-11ec-0228-f357eef26cf5
+# ╠═4861f327-812a-4cc1-9340-9196743b1e0f
 # ╠═8c9a9d91-5b09-4b20-b29b-310b9d4aac87
 # ╠═9ded67cd-5e48-484e-b802-2349412357d7
 # ╠═3c1e18dc-1f18-48db-a2d2-32cd5938a21c
@@ -2175,7 +2156,6 @@ version = "0.9.1+5"
 # ╠═402c2f4f-5628-4f28-96f4-026c52d7706e
 # ╠═7f8ce4f5-0446-4405-9632-3cc85adc44d8
 # ╠═8cbf2ac8-441e-4583-b0ca-76f45c09a6dc
-# ╠═d489b60e-4494-4fa5-8f25-9d734f630965
 # ╠═9760dc4c-d579-45a4-abe6-9a5493b4062f
 # ╠═9e7f7dba-67bf-41bb-965a-2dbf71dd10fd
 # ╠═2c700738-8c62-4e9d-9a11-5462e94bb483
@@ -2189,12 +2169,9 @@ version = "0.9.1+5"
 # ╠═e4a5c1b8-1205-499f-8431-438e4990ff1b
 # ╠═0dc34623-9727-4248-8a79-61816a56daf7
 # ╠═203dd802-c08a-463c-8d25-d749bb992b32
-# ╠═4734d206-480a-48c5-b45e-01ef0984ca03
 # ╠═84a76a77-ac19-4874-b37f-28ff12a9735e
 # ╠═4c1ee6c9-ecac-4a55-bae5-aac10522da26
 # ╠═c0baeace-61a1-4c71-9860-1c1b47b85575
-# ╠═04103081-572e-48b7-ad32-01711279c9b1
-# ╠═50ebf49d-1fd2-4578-95c7-0054d8a2a5be
 # ╠═59fc0870-43ef-43d8-be26-80d02b8553c0
 # ╠═3cda4ea0-e825-48ae-a93a-74fb802784d4
 # ╠═f6d39e0a-2598-46f4-b285-006ed5dba4e5
@@ -2202,12 +2179,11 @@ version = "0.9.1+5"
 # ╠═987a3631-dcc0-44c6-ac58-fd55eab95848
 # ╠═4adfa5ae-f4bd-44f7-983b-ea7a1e24de53
 # ╠═90ee9872-8679-465f-991c-d575ff3d2708
-# ╠═333eaddd-ccbb-4cf4-89f1-72f7a1c178e7
 # ╠═90fb2704-de9a-4026-9826-1f09de08fc64
 # ╠═2d0d20d1-4bac-4555-a513-c12ef9103fa6
-# ╠═187c037f-8fa2-4b92-a907-0a8708f9f769
 # ╠═285020d8-7fb6-4077-8ea9-cdc6f858db1d
 # ╠═5c98cfae-91fb-40d5-a8d9-fb8791ff3745
 # ╠═4f09e31b-ebf5-4658-8db6-93aae7fb23a8
+# ╠═5fb0ccee-0605-4a05-b828-7d18da1170a4
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
