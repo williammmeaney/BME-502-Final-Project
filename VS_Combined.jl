@@ -195,7 +195,7 @@ end
 
 #exp.(likleyhoods_after_below_threshold[1])
 
-remove_each_data_point_ind(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
+#remove_each_data_point_ind(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
 
 function get_final_data_set(b_actin_data,pink_data,index,triple_avg,double_std)
 	likleyhoods_after_each_data_is_removed, MLE_outputs_after_each_data_is_removed =remove_each_data_point_ind(b_actin_data,index,triple_avg,double_std)
@@ -248,5 +248,7 @@ means_100,sigma_100=distr_det_no_index(pink_100,2,triple_max_pink_values, std_do
 beta_200,pink_200= get_final_data_set(B_actin_h2o2_200,Pink_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
 means_200,sigma_200=distr_det_no_index(pink_200,3,triple_max_pink_values, std_double_pink)
 
+mean_results=[means_c, means_100, means_200]
+sigma_results = [sigma_c, sigma_100, sigma_200]
 
 

@@ -1,12 +1,21 @@
 ### A Pluto.jl notebook ###
-# v0.19.4
+# v0.18.0
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ b386b080-d22e-11ec-0228-f357eef26cf5
+# ╔═╡ aadbfa5c-156a-4daa-af0b-d143e353a7c9
 begin
-	using CSV# as CV
+	### A Pluto.jl notebook ###
+	# v0.19.4
+	
+	using Markdown
+	using InteractiveUtils
+end
+
+# ╔═╡ 596989bf-dd8f-4538-bc1f-f3b0430b6110
+begin
+	using CSV
 	using DataFrames
 	using Gtk
 	using Statistics
@@ -14,75 +23,59 @@ begin
 	using StatsPlots
 	using FillArrays
 	import SpecialFunctions as SF
-	using Distributions
+	import Distributions as di
 	using HypothesisTests
-	import Pingouin as Pg
+	import Pingouin as pg
 end
 
-# ╔═╡ 4861f327-812a-4cc1-9340-9196743b1e0f
+# ╔═╡ 7c27b210-2432-4155-b58f-13dd998bb80a
 #=
 The following cells before the csv import cells are attempts at metaprogramming - to dynamically create variables from the contents of a string
 =#
 
-# ╔═╡ 8c9a9d91-5b09-4b20-b29b-310b9d4aac87
-# ╠═╡ disabled = true
-#=╠═╡
+# ╔═╡ ac083b1c-2ada-4656-baca-7ba52e36383f
 #=function string_as_varname(s::String,v::Any)
          s=Symbol(s)
          @eval (($s) = ($v))
 end
 =#
-  ╠═╡ =#
 
-# ╔═╡ 9ded67cd-5e48-484e-b802-2349412357d7
-# ╠═╡ disabled = true
-#=╠═╡
-#Symbol("sample")
-  ╠═╡ =#
+# ╔═╡ b220c5ca-137d-48c8-8b57-a8aac87ba6db
+#Symbol("sample")#
 
-# ╔═╡ 3c1e18dc-1f18-48db-a2d2-32cd5938a21c
-# ╠═╡ disabled = true
-#=╠═╡
-#@eval ($:sample=7)
-  ╠═╡ =#
+# ╔═╡ 4daea8a6-25eb-4a25-81cb-231546595421
+#@eval ($:sample=7)#
 
-# ╔═╡ 417d35d8-f95e-49f1-b190-b4e32c2347e0
-# ╠═╡ disabled = true
-#=╠═╡
-#test_string="abc123"
-  ╠═╡ =#
+# ╔═╡ 740542e6-e151-4ac4-8784-c3dece5c4e3c
+#test_string="abc123"#
 
-# ╔═╡ 053dbf13-a93d-4bff-aa26-7164c034c145
-# ╠═╡ disabled = true
-#=╠═╡
-#:test_string
-  ╠═╡ =#
+# ╔═╡ 96de9b31-0763-49ad-9e3f-ee20877ff3c2
+#:test_string#
 
-# ╔═╡ 11567af4-16b1-4e42-a142-da20324d54d9
-# ╠═╡ disabled = true
-#=╠═╡
-#@eval($:string(abc123)=8)
-  ╠═╡ =#
+# ╔═╡ ac6981fb-f177-4994-adf9-b230f482bc70
+#@eval($:string(abc123)=8)#
 
-# ╔═╡ 0217024b-5160-4272-89f8-ddee02d53efe
-# ╠═╡ disabled = true
-#=╠═╡
-#sample
-  ╠═╡ =#
+# ╔═╡ 845ccaa3-1555-4d39-84d4-65863c7b4d11
+#sample#
 
-# ╔═╡ e7ee19e2-beb9-4da6-9a18-25834f3e47d2
-file_contents_vert=CSV.read("C:\\Users\\willi\\OneDrive - Stony Brook University\\Courses\\Undergraduate\\Senior Year\\BME 502\\GitHub\\BME-502-Final-Project\\DataForFinal_vert.csv", DataFrame);
+# ╔═╡ 97215926-f1fe-45a3-8934-2e363c0f7a04
+file_contents_vert=CSV.read("C:\\Users\\Mahek\\OneDrive\\Desktop\\BME 502\\DataForFinal_vert.csv", DataFrame);
 
-# ╔═╡ 16692ff5-3092-4eed-966e-d3fd6f5e8821
-file_contents_hor=CSV.read("C:\\Users\\willi\\OneDrive - Stony Brook University\\Courses\\Undergraduate\\Senior Year\\BME 502\\GitHub\\BME-502-Final-Project\\DataForFinal_hor.csv", DataFrame);
+# ╔═╡ 6ff337a3-8a80-45b0-8e20-ceb980f1625f
+file_contents_hor=CSV.read("C:\\Users\\Mahek\\OneDrive\\Desktop\\BME 502\\DataForFinal_hor.csv", DataFrame);
 
-# ╔═╡ 30482cda-e17a-422a-ae59-182913bc5276
+# ╔═╡ 768ace98-da5f-4c92-a8a5-3b4f2be828ce
 file_contents=copy(file_contents_vert)
 
-# ╔═╡ d0a6b97a-6010-4594-86b6-20153adae121
+# ╔═╡ 21f2dbe0-2743-4e9b-aede-1ad9a7e280b2
 file_contents_no_outliers=copy(file_contents_vert)
 
-# ╔═╡ aa1360ad-c4aa-4937-856c-6a7315269849
+# ╔═╡ ece2601c-95aa-4ed7-92ef-8df9cf58733c
+#=
+The following cell is a simple calculation that is done when running western blots. It uses the absorbance values found from a spectrometer to calculate how much cell lysate needs to be dissolved in the sample to ensure equal concentration across all samples.
+=#
+
+# ╔═╡ a0ddfb63-b07e-4d93-9c12-2aec248e1d71
 begin 
 	#protein calc
 	Frequency=(file_contents[:,:Absorbance].-0.0915)./ 0.5759;
@@ -93,134 +86,102 @@ begin
 	max_b_actin=maximum(file_contents[:,:B_actin]);
 end
 
-# ╔═╡ 79bffd3c-43a5-4290-be11-29e0a8e798d2
+# ╔═╡ 3906a770-9bce-47b9-a8cf-986c224e8a77
 normalized_file_contents=copy(file_contents)
 
-# ╔═╡ ca127646-0943-491c-9d71-a7775deda2fd
+# ╔═╡ f7732e8f-2c03-4432-85fb-d62f1760008a
 normalized_file_contents[:,:B_actin]=normalized_file_contents[:,:B_actin]/max_b_actin
 
-# ╔═╡ 018ae366-7319-4a45-9692-5bcc6ced8f47
+# ╔═╡ ae53efb6-7630-49c9-9a3e-38aa3ba7a79c
 normalized_file_contents[:,:Pink_1]=normalized_file_contents[:,:B_actin].*normalized_file_contents[:,:Pink_1]
 
-# ╔═╡ ed6160be-cc82-4b98-aeec-7b053493ac7f
+# ╔═╡ f4b0cb27-dedc-43ab-b898-1f6ff0c008a8
 normalized_file_contents
 
-# ╔═╡ 75358f9b-1545-484c-98c6-d021e358fdc2
+# ╔═╡ 0f22da9f-4aa7-4c64-b531-a0ad9e38805b
 grouped_trials=groupby(normalized_file_contents,:SampleType)
 
-# ╔═╡ bc7e2583-bef5-426f-9f9c-ca41a99159ff
-size(grouped_trials)
-
-# ╔═╡ 3874a84c-851a-4cfe-9b0e-4425148c4d79
+# ╔═╡ bc8a8c1d-e798-463f-be71-6253443c1365
 begin
 	Pink_control=grouped_trials[("C",)].Pink_1
 	B_actin_control=grouped_trials[("C",)].B_actin
 	Abs_control=grouped_trials[("C",)].Absorbance
 end
 
-# ╔═╡ e6194ff0-5439-49c8-b0d2-72e6c208df60
-B_actin_control
-
-# ╔═╡ 25d997aa-63ad-40b1-aa3f-2191268b313e
+# ╔═╡ 146e2ed5-5cef-4b57-b7d7-e47d691b7d60
 begin
 	Pink_h2o2_100=grouped_trials[("100",)].Pink_1
 	B_actin_h2o2_100=grouped_trials[("100",)].B_actin
 	Abs_h2o2_100=grouped_trials[("100",)].Absorbance
 end
 
-# ╔═╡ a6175163-760d-476c-b0f5-a794bfb62b37
+# ╔═╡ e1ae5c56-223d-4bf4-b051-5c5fb228982b
 begin
 	Pink_h2o2_200=grouped_trials[("200",)].Pink_1
 	B_actin_h2o2_200=grouped_trials[("200",)].B_actin
 	Abs_h2o2_200=grouped_trials[("200",)].Absorbance
 end
 
-# ╔═╡ 5e2fb4e5-df2b-4e85-bb43-1db5a20f8a22
-#number_samples=Int64(ncol(file_contents)/4)
-
-# ╔═╡ 115c5252-efac-4d9f-80a6-5b9046a01a6b
-#=
-for sample_num=1:number_samples
-	for i=1:3
-		#determine col type
-		if i==1
-			data_col_name="abs"
-		elseif i==2
-			data_col_name="B-actin"
-		else
-			data_col_name="pink-1"
-		end
-		temp=string(sample_num,"_",data_col_name)
-		column_count=4*(sample_num-1)+i
-		@eval($:string(sample_num,data_col_name)=$file_contents[:,column_count])
-		#string_as_varname(temp,file_contents[:,column_count])
-	end
-end
-=#
-
-# ╔═╡ 9efb9a56-f6ba-4db8-a28a-73b8ef9d1ad5
+# ╔═╡ 9448f0e6-05ab-40c4-9ab8-7995cc60a766
 begin
 	max_pink_values=[]
 	max_beta_actin_values=[]
 end
 
-# ╔═╡ bfe19066-53b7-4e10-85f5-538095c6b392
+# ╔═╡ db111abd-2f70-4480-8713-64bb635ca39f
 begin
 	push!(max_pink_values,maximum(Pink_control))
 	push!(max_pink_values,maximum(Pink_h2o2_100))
 	push!(max_pink_values,maximum(Pink_h2o2_200))
 end
 
-# ╔═╡ 85ccd5fb-34c4-4c01-afeb-6448bcc1416e
+# ╔═╡ f736b21c-4e9f-42de-b6e3-27db27192d97
 begin
 	push!(max_beta_actin_values,maximum(B_actin_control))
 	push!(max_beta_actin_values,maximum(B_actin_h2o2_100))
 	push!(max_beta_actin_values,maximum(B_actin_h2o2_200))
 end
 
-# ╔═╡ 57be7575-1298-4a00-8ace-316af43e4c7f
+# ╔═╡ c1eab131-f2ff-40b3-9602-d3e57b053d31
 begin
 	triple_max_pink_values=max_pink_values.*3
 	triple_max_beta_actin_values=max_beta_actin_values.*3
 end
 
-# ╔═╡ fbb43ee0-8d6a-4592-b084-01951efd5623
-triple_max_beta_actin_values[3]
-
-# ╔═╡ 1d1c58f1-e155-4dfb-bb1c-6de40123d780
+# ╔═╡ 7f54b279-5724-4ed9-97f4-f413e4d89772
 begin
 	std_pink_values=[]
 	std_beta_actin_values=[]
 end
 
-# ╔═╡ e18284fc-d46e-4a74-ae26-b23cafcd2a8a
+# ╔═╡ c0a06916-9b06-4b55-b086-020e83dc247b
 begin
 	push!(std_pink_values,std(Pink_control))
 	push!(std_pink_values,std(Pink_h2o2_100))
 	push!(std_pink_values,std(Pink_h2o2_200))
 end
 
-# ╔═╡ 402c2f4f-5628-4f28-96f4-026c52d7706e
+# ╔═╡ f1833ae9-3958-4d60-8d8e-c8cb061bfcd2
 begin
 	push!(std_beta_actin_values,std(B_actin_control))
 	push!(std_beta_actin_values,std(B_actin_h2o2_100))
 	push!(std_beta_actin_values,std(B_actin_h2o2_200))
 end
 
-# ╔═╡ 7f8ce4f5-0446-4405-9632-3cc85adc44d8
+# ╔═╡ 221faf04-1685-4e86-9b34-dc13a2b94ea1
 begin
 	std_double_pink=std_pink_values.*2
 	std_double_beta_actin=std_beta_actin_values.*2
 end
 
-# ╔═╡ 8cbf2ac8-441e-4583-b0ca-76f45c09a6dc
+# ╔═╡ 83f9c20f-4f09-4fa8-833b-73654fcb2ecd
 @model function normal_fit(data,index,triple_avg,double_std)
 	μ ~ Uniform(0,triple_avg[index])
 	σ ~ Uniform(0,double_std[index])
     data ~ MvNormal(Fill(μ,length(data)),σ)
 end
 
-# ╔═╡ 9760dc4c-d579-45a4-abe6-9a5493b4062f
+# ╔═╡ 0267c013-6f89-4ff1-a359-d5a6b80cf149
 function distr_det(data,index,triple_avg,double_std)
 	means=[]
 	sigmas=[]
@@ -232,27 +193,18 @@ function distr_det(data,index,triple_avg,double_std)
 	return means, sigmas
 end
 
-# ╔═╡ 9e7f7dba-67bf-41bb-965a-2dbf71dd10fd
-index=3
-
-# ╔═╡ 2c700738-8c62-4e9d-9a11-5462e94bb483
-temp_model=normal_fit(B_actin_h2o2_200, index, triple_max_beta_actin_values, std_double_beta_actin)
-
-# ╔═╡ 6ff70e77-c4fc-4a90-adb9-8195c785d8f4
-chain = Turing.sample(temp_model,NUTS(0.65),1000)
-
-# ╔═╡ 0aa7a06d-bc11-4a56-9a2c-780249fda01e
+# ╔═╡ fb8df528-9f82-43a0-9200-7364edbbc426
 function get_mu_sigma(data,index,z_abs,tripple_avg,double_std)
 	means, sigmas=distr_det(data,index,triple_avg,double_std)
 	z=[-z_abs,z_abs]
 	x=z.*sigmas[1].+means[1]
 	plot(Normal(means[1],sigmas[1]))
-	pos_cutoff=	SF.erf(z[2]/sqrt(2)/2)
+	pos_cutoff=	erf(z[2]/sqrt(2)/2)
 	neg_cutoff=1-pos_cutoff
 	return x, means, sigmas
 end
 
-# ╔═╡ 57def3b2-83dc-4dc6-821e-00313e6ef9bd
+# ╔═╡ 7e579703-0737-4107-a928-1427d6fa0687
 function create_list_of_outliers(data,index,z_abs,triple_avg,double_std)
 	x, means, sigmas =get_mu_sigma(data,index,z_abs,triple_avg,double_std)
 	outliers=[]
@@ -264,7 +216,7 @@ function create_list_of_outliers(data,index,z_abs,triple_avg,double_std)
 	return outliers
 end
 
-# ╔═╡ 65e3f7e1-b3c7-4646-918d-f1b95df3a7b7
+# ╔═╡ 9e0ee95d-8026-41a7-8591-1e26ef01dfe5
 function MLE(data,index,triple_avg,double_std)
 	means, sigmas = distr_det(data,index,triple_avg,double_std)
 	likelyhoods=zeros(length(data))
@@ -277,22 +229,20 @@ function MLE(data,index,triple_avg,double_std)
 	return MLE_output, likelyhoods, means
 end
 
-# ╔═╡ 73f99cba-508d-45da-ac8c-738a113f186d
+# ╔═╡ 63f8e00a-3eeb-4f0f-824a-63451bc8f207
 begin
-	#likleyhoods_after_each_data_is_removed=[]
-	#MLE_outputs_after_each_data_is_removed=[]
 	likleyhoods_after_below_threshold=[]
 	MLE_outputs_after_below_threshold=[]	
 end
 
-# ╔═╡ 1da71409-b93f-4375-85a7-56f8ed09a314
+# ╔═╡ 040360f8-13f9-4163-863c-77a42b19123b
 #=
 	The function remove_data_below_threshold examines the likelihood of each data point in a set. If the likeleihood is below 5%, the data point will be removed and a new maximum likelihood estimation will be calculated. If there are multiple data points under this threshold then all of those ppints will be removed.
 
 	The function remove_each_data_point_ind does the same thing as the previous function, but without any regard for a threshold. Instead this will help us see if there are any points within our dataset that don't qualify as "outliers" but still have a significiant impact on our data.  Note, this is evaluated one at a time so multiple data points will not be removed at once 
 =#
 
-# ╔═╡ e6b7b322-d8a9-41ba-b799-8f1d0eeaa075
+# ╔═╡ 2ce77ef6-242b-4e9b-8e55-6baf0fbb10cd
 function remove_data_below_threshold(data,index,triple_avg,double_std,threshold)
 	MLE_output, likelyhoods, means= MLE(data,index,triple_avg,double_std)
 	new_data=[]
@@ -315,12 +265,12 @@ function remove_data_below_threshold(data,index,triple_avg,double_std,threshold)
 	push!(MLE_outputs_after_below_threshold, MLE_output)
 end
 
-# ╔═╡ e4a5c1b8-1205-499f-8431-438e4990ff1b
+# ╔═╡ 9acd0ee3-a62b-440b-9303-b64d4e31a954
 #=
 These results show us that removing the first data point gives us the highest maximum likelihood estimation. The higher the MLE, the better the fit of the data.Thus we qualify data point one from the 200uM experimental group as an outlier.
 =#
 
-# ╔═╡ 0dc34623-9727-4248-8a79-61816a56daf7
+# ╔═╡ c7a2fa72-d888-4a10-b594-bd9b23a6ce72
 function remove_each_data_point_ind(data,index,triple_avg,double_std)
 	likleyhoods_after_each_data_is_removed=[]
 	MLE_outputs_after_each_data_is_removed=[]
@@ -341,19 +291,19 @@ function remove_each_data_point_ind(data,index,triple_avg,double_std)
 	return likleyhoods_after_each_data_is_removed, MLE_outputs_after_each_data_is_removed
 end
 
-# ╔═╡ 203dd802-c08a-463c-8d25-d749bb992b32
+# ╔═╡ 4cdf84e3-d724-42d5-a0a8-7e353c397918
 MLE(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
 
-# ╔═╡ 84a76a77-ac19-4874-b37f-28ff12a9735e
- remove_data_below_threshold(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin,0.05)
+# ╔═╡ 59e6fe84-9252-489c-927c-0fc6839e28d4
+remove_data_below_threshold(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin,0.05)
 
-# ╔═╡ 4c1ee6c9-ecac-4a55-bae5-aac10522da26
+# ╔═╡ ca70c75b-29f9-4c9d-a94b-50c2475d95a3
 exp.(likleyhoods_after_below_threshold[1])
 
-# ╔═╡ c0baeace-61a1-4c71-9860-1c1b47b85575
- remove_each_data_point_ind(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
+# ╔═╡ bc5ceb87-d1b7-4aa7-a9b3-570ac8260bfc
+remove_each_data_point_ind(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
 
-# ╔═╡ 59fc0870-43ef-43d8-be26-80d02b8553c0
+# ╔═╡ 9971f0e6-0d7b-4db6-a490-b76477f19b6e
 function get_final_data_set(b_actin_data,pink_data,index,triple_avg,double_std)
 	likleyhoods_after_each_data_is_removed, MLE_outputs_after_each_data_is_removed =remove_each_data_point_ind(b_actin_data,index,triple_avg,double_std)
 	mean_MLE=mean(MLE_outputs_after_each_data_is_removed);
@@ -369,80 +319,91 @@ function get_final_data_set(b_actin_data,pink_data,index,triple_avg,double_std)
 	return new_b_actin_data,new_pink_data
 end
 
-# ╔═╡ 3cda4ea0-e825-48ae-a93a-74fb802784d4
+# ╔═╡ 9ce7d179-463a-4503-8724-0bae657605aa
+new_b_actin_100, new_pink_100 = get_final_data_set(B_actin_h2o2_100,Pink_h2o2_100, 2,triple_max_beta_actin_values,std_double_beta_actin)
+
+# ╔═╡ 60314612-f4df-487f-8847-7856d0ccc05d
+new_b_actin_200, new_pink_200 = get_final_data_set(B_actin_h2o2_200,Pink_h2o2_200, 3,triple_max_beta_actin_values,std_double_beta_actin)
+
+# ╔═╡ e603609f-9d6e-415a-96fa-14bf0ec1b414
 MLE_outputs_after_below_threshold
 
-# ╔═╡ f6d39e0a-2598-46f4-b285-006ed5dba4e5
-OneSampleTTest(Pink_control, new_pink_data)
+# ╔═╡ 5344065e-be62-4b08-a08a-8592028cc53e
+UnequalVarianceTTest(Pink_control, new_pink_100)
 
-# ╔═╡ 7f127393-c491-42eb-8097-fe11f4530b62
-UnequalVarianceTTest(Pink_control, new_pink_data)
+# ╔═╡ a0097a65-1ca6-4b48-b39d-18ac0c39b6a7
+UnequalVarianceTTest(Pink_control, new_pink_200)
 
-# ╔═╡ 987a3631-dcc0-44c6-ac58-fd55eab95848
-#= 
-We attempted to code a Bayesian test for significance but after questionable success we decided to add in this t-test as an alternative approach to determining significance. Running the test with experimental group 1 and 2 both show no statistical difference between them, but we are wary of these results as there seems to be a large increase in Pink-1 expression in the 200uM experimental group.
-=#
+# ╔═╡ 732ba7fd-c7a0-44f8-9655-8e5f0574fd32
+#= This array was created by running the above test for both experimental groups. It is used to perform the bayesian t-test according to the documentation on the Pingouin package. https://docs.juliahub.com/Pingouin/Lh7T4/0.2.2/bayesian/#Pingouin.bayesfactor_ttest =#
 
-# ╔═╡ 4adfa5ae-f4bd-44f7-983b-ea7a1e24de53
-Pink_control
+# ╔═╡ c7a30ded-5b9e-4c39-ad27-605e0ce6c5d5
+t_test_results = [1.0393001576378293, -0.5444702558177372]
 
-# ╔═╡ 90ee9872-8679-465f-991c-d575ff3d2708
-Pink_h2o2_100
-
-# ╔═╡ 90fb2704-de9a-4026-9826-1f09de08fc64
+# ╔═╡ c1e3618d-dfc0-478b-97d7-f73ead71fcf2
 @model function normal_fit_no_index(data,triple_avg,double_std)
 	μ ~ Uniform(0,triple_avg)
 	σ ~ Uniform(0,double_std)
     data ~ MvNormal(Fill(μ,length(data)),σ)
 end
 
-# ╔═╡ 2d0d20d1-4bac-4555-a513-c12ef9103fa6
+# ╔═╡ 35f754a6-7579-4ff3-8381-34c03c296d97
 function distr_det_no_index(data,index,triple_avg,double_std)
 	means=[]
 	sigmas=[]
-	#=if index==1
-		avg = triple_avg[1]
-		std = double_std[1]
-	else =#
-		max1 = 3* maximum(data)
-		sd1 = 2*std(data)
-	#end
+	max1 = 3* maximum(data)
+	sd1 = 2*std(data)
 	model1 = normal_fit_no_index(data,max1,sd1)
 	chain = Turing.sample(model1,NUTS(0.65),1000)
 	means=mean(chain[:μ])
 	sigmas=mean(chain[:σ])
-	#plot(chain)
 	return means, sigmas
 end
 
-# ╔═╡ 285020d8-7fb6-4077-8ea9-cdc6f858db1d
+# ╔═╡ 23b41eae-2726-4cf2-a108-52fc0c6f2f35
+#= The following 3 cells are not used in our code. We had planned to use them to find a mean difference distribution but instead chose to switch to the bayes factor method.
+=#
+
+# ╔═╡ 6a1b928e-7263-4d2d-a226-1ba75740f4cb
 begin
 	beta_c,pink_c= get_final_data_set(B_actin_control,Pink_control,1,triple_max_beta_actin_values,std_double_beta_actin)
 	means_c,sigma_c=distr_det_no_index(pink_c,1,triple_max_pink_values, std_double_pink)
 end
 
-# ╔═╡ 5c98cfae-91fb-40d5-a8d9-fb8791ff3745
+# ╔═╡ 3cf56bec-f224-4518-982b-ab141ec9a684
 begin
 	beta_100,pink_100= get_final_data_set(B_actin_h2o2_100,Pink_h2o2_100,2,triple_max_beta_actin_values,std_double_beta_actin)
 	means_100,sigma_100=distr_det_no_index(pink_100,2,triple_max_pink_values, std_double_pink)
 end
 
-# ╔═╡ 4f09e31b-ebf5-4658-8db6-93aae7fb23a8
+# ╔═╡ d432a474-562c-49ba-ae43-295acbb8d748
 begin
 	beta_200,pink_200= get_final_data_set(B_actin_h2o2_200,Pink_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
 	means_200,sigma_200=distr_det_no_index(pink_200,3,triple_max_pink_values, std_double_pink)
 end
 
-# ╔═╡ 5fb0ccee-0605-4a05-b828-7d18da1170a4
-@model function mean_diff_dist(mu_1, sigma_1, mu_2, sigma_2)
-  
-end
+# ╔═╡ 2a1b52ee-0d37-43dc-93de-a436f98a9b38
+function find_bayes_factor(data1, data2, index)
+	size_1 = length(data1)
+	size_2 = length(data2)
+	pg.bayesfactor_ttest(t_test_results[index], size_1, size_2)
+end 
 
-# ╔═╡ 42da9707-e082-4d10-8981-f3c3d117e53b
-# ╠═╡ disabled = true
-#=╠═╡
- Normal(mu_1, sigma_1) - Normal(mu_2, sigma_2)
-  ╠═╡ =#
+# ╔═╡ a21171ca-0f2b-49b5-9fe5-227412fc6679
+bf1 = find_bayes_factor(Pink_control, new_pink_100, 1)
+
+# ╔═╡ 17b71a70-6df1-477d-8215-e987337efa2e
+bf2 = find_bayes_factor(Pink_control, new_pink_200, 2)
+
+# ╔═╡ 51ff8bbe-034a-4bcb-915e-727b18ff5c28
+log10(bf1)
+
+# ╔═╡ 3c434b3c-be5b-438b-9bf9-d8144449731d
+log10(bf2)
+
+# ╔═╡ a9abaa3d-9c82-4384-8498-f3181d732419
+#= The above results show that neither experimental group are significantly different than the control. We are interpreting this based on the chart in the follwing link which says that a bayes factor under 1 is not significant.
+https://en.wikipedia.org/wiki/Bayes_factor#Interpretation =#
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -453,6 +414,8 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
 Gtk = "4c0ca9eb-093a-5379-98c5-f87ac0bbbf44"
 HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
+InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+Markdown = "d6f4376e-aef5-505a-96c1-9c027394607a"
 Pingouin = "61ac1d4c-5a1f-4019-949c-7919748f8c44"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
@@ -591,10 +554,16 @@ uuid = "9718e550-a3fa-408a-8086-8db961cd8217"
 version = "0.1.1"
 
 [[Bijectors]]
-deps = ["ArgCheck", "ChainRulesCore", "ChangesOfVariables", "Compat", "Distributions", "Functors", "InverseFunctions", "IrrationalConstants", "LinearAlgebra", "LogExpFunctions", "MappedArrays", "Random", "Reexport", "Requires", "Roots", "SparseArrays", "Statistics"]
-git-tree-sha1 = "a83abdc57f892576bf1894d558e8a5c35505cdb1"
+deps = ["ArgCheck", "ChainRulesCore", "Compat", "Distributions", "Functors", "IrrationalConstants", "LinearAlgebra", "LogExpFunctions", "MappedArrays", "NonlinearSolve", "Random", "Reexport", "Requires", "SparseArrays", "Statistics"]
+git-tree-sha1 = "dca5e02c9426b2f8ce86d8e723d0702ff33df234"
 uuid = "76274a88-744f-5084-9051-94815aaf08c4"
-version = "0.10.1"
+version = "0.9.8"
+
+[[BitTwiddlingConvenienceFunctions]]
+deps = ["Static"]
+git-tree-sha1 = "28bbdbf0354959db89358d1d79d421ff31ef0b5e"
+uuid = "62783981-4cbd-42fc-bca8-16325de8dc4b"
+version = "0.1.3"
 
 [[Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -602,10 +571,11 @@ git-tree-sha1 = "19a35467a82e236ff51bc17a3a44b69ef35185a2"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
 version = "1.0.8+0"
 
-[[CEnum]]
-git-tree-sha1 = "eb4cb44a499229b3b8426dcfb5dd85333951ff90"
-uuid = "fa961155-64e5-5f13-b03f-caf6b980ea82"
-version = "0.4.2"
+[[CPUSummary]]
+deps = ["CpuId", "IfElse", "Static"]
+git-tree-sha1 = "0eaf4aedad5ccc3e39481db55d72973f856dc564"
+uuid = "2a0fbf3d-bb9c-48f3-b0a9-814d99fd7ab9"
+version = "0.1.22"
 
 [[CSV]]
 deps = ["Dates", "Mmap", "Parsers", "PooledArrays", "SentinelArrays", "Tables", "Unicode"]
@@ -648,6 +618,12 @@ deps = ["ChainRulesCore", "LinearAlgebra", "Test"]
 git-tree-sha1 = "1e315e3f4b0b7ce40feded39c73049692126cf53"
 uuid = "9e997f8a-9a97-42d5-a9f1-ce6bfc15e2c0"
 version = "0.1.3"
+
+[[CloseOpenIntervals]]
+deps = ["ArrayInterface", "Static"]
+git-tree-sha1 = "f576084239e6bdf801007c80e27e2cc2cd963fe0"
+uuid = "fb6a15b2-703c-40df-9091-08a04967cfa9"
+version = "0.1.6"
 
 [[Clustering]]
 deps = ["Distances", "LinearAlgebra", "NearestNeighbors", "Printf", "SparseArrays", "Statistics", "StatsBase"]
@@ -727,6 +703,12 @@ deps = ["StaticArrays"]
 git-tree-sha1 = "9f02045d934dc030edad45944ea80dbd1f0ebea7"
 uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
 version = "0.5.7"
+
+[[CpuId]]
+deps = ["Markdown"]
+git-tree-sha1 = "32d125af0fb8ec3f8935896122c5e345709909e5"
+uuid = "adafc99b-e345-5852-983c-f28acb93d879"
+version = "0.3.0"
 
 [[Crayons]]
 git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
@@ -890,6 +872,12 @@ git-tree-sha1 = "246621d23d1f43e3b9c368bf3b72b2331a27c286"
 uuid = "1a297f60-69ca-5386-bcde-b61e274b549b"
 version = "0.13.2"
 
+[[FiniteDiff]]
+deps = ["ArrayInterface", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays"]
+git-tree-sha1 = "51c8f36c81badaa0e9ec405dcbabaf345ed18c84"
+uuid = "6a86dc24-6348-571c-b903-95158fe2bd41"
+version = "2.11.1"
+
 [[FixedPointNumbers]]
 deps = ["Statistics"]
 git-tree-sha1 = "335bfdceacc84c5cdf16aadc768aa5ddfc5383cc"
@@ -940,12 +928,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcu
 git-tree-sha1 = "51d2dfe8e590fbd74e7a842cf6d13d8a2f45dc01"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
 version = "3.3.6+0"
-
-[[GPUArrays]]
-deps = ["Adapt", "LLVM", "LinearAlgebra", "Printf", "Random", "Serialization", "Statistics"]
-git-tree-sha1 = "c783e8883028bf26fb05ed4022c450ef44edd875"
-uuid = "0c68f7d7-f131-5f86-a1c3-88cf8149b2d7"
-version = "8.3.2"
 
 [[GR]]
 deps = ["Base64", "DelimitedFiles", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Printf", "Random", "RelocatableFolders", "Serialization", "Sockets", "Test", "UUIDs"]
@@ -1017,6 +999,24 @@ deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll",
 git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "2.8.1+1"
+
+[[HostCPUFeatures]]
+deps = ["BitTwiddlingConvenienceFunctions", "IfElse", "Libdl", "Static"]
+git-tree-sha1 = "18be5268cf415b5e27f34980ed25a7d34261aa83"
+uuid = "3e5b6fbb-0976-4d2c-9146-d79de83f2fb0"
+version = "0.1.7"
+
+[[Hwloc]]
+deps = ["Hwloc_jll"]
+git-tree-sha1 = "92d99146066c5c6888d5a3abc871e6a214388b91"
+uuid = "0e44f5e4-bd66-52a0-8798-143a42290a1d"
+version = "2.0.0"
+
+[[Hwloc_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "303d70c961317c4c20fafaf5dbe0e6d610c38542"
+uuid = "e33a78d0-f292-5ffc-b300-72abe9b543c8"
+version = "2.7.1+0"
 
 [[HypergeometricFunctions]]
 deps = ["DualNumbers", "LinearAlgebra", "SpecialFunctions", "Test"]
@@ -1100,6 +1100,12 @@ git-tree-sha1 = "fa6287a4469f5e048d763df38279ee729fbd44e5"
 uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
 version = "1.4.0"
 
+[[IterativeSolvers]]
+deps = ["LinearAlgebra", "Printf", "Random", "RecipesBase", "SparseArrays"]
+git-tree-sha1 = "1169632f425f79429f245113b775a0e3d121457c"
+uuid = "42fd0dbc-a981-5370-80f2-aaf504508153"
+version = "0.9.2"
+
 [[IteratorInterfaceExtensions]]
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
 uuid = "82899510-4779-5014-852e-03e436cf321d"
@@ -1141,18 +1147,6 @@ git-tree-sha1 = "bf36f528eec6634efc60d7ec062008f171071434"
 uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
 version = "3.0.0+1"
 
-[[LLVM]]
-deps = ["CEnum", "LLVMExtra_jll", "Libdl", "Printf", "Unicode"]
-git-tree-sha1 = "c8d47589611803a0f3b4813d9e267cd4e3dbcefb"
-uuid = "929cbde3-209d-540e-8aea-75f648917ca0"
-version = "4.11.1"
-
-[[LLVMExtra_jll]]
-deps = ["Artifacts", "JLLWrappers", "LazyArtifacts", "Libdl", "Pkg", "TOML"]
-git-tree-sha1 = "771bfe376249626d3ca12bcd58ba243d3f961576"
-uuid = "dad2f222-ce93-54a1-a47d-0025e8a3acab"
-version = "0.0.16+0"
-
 [[LRUCache]]
 git-tree-sha1 = "d64a0aff6691612ab9fb0117b0995270871c5dfc"
 uuid = "8ac3fa9e-de4c-5943-b1dc-09c6b5f20637"
@@ -1174,6 +1168,12 @@ deps = ["Formatting", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdow
 git-tree-sha1 = "46a39b9c58749eefb5f2dc1178cb8fab5332b1ab"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
 version = "0.15.15"
+
+[[LayoutPointers]]
+deps = ["ArrayInterface", "LinearAlgebra", "ManualMemory", "SIMDTypes", "Static"]
+git-tree-sha1 = "b651f573812d6c36c22c944dd66ef3ab2283dfa1"
+uuid = "10f19ff3-798f-405d-979b-55457f8fc047"
+version = "0.1.6"
 
 [[LazyArtifacts]]
 deps = ["Artifacts", "Pkg"]
@@ -1289,6 +1289,12 @@ git-tree-sha1 = "e9437ef53c3b29a838f4635e748bb38d29d11384"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 version = "0.4.8"
 
+[[LoopVectorization]]
+deps = ["ArrayInterface", "CPUSummary", "ChainRulesCore", "CloseOpenIntervals", "DocStringExtensions", "ForwardDiff", "HostCPUFeatures", "IfElse", "LayoutPointers", "LinearAlgebra", "OffsetArrays", "PolyesterWeave", "SIMDDualNumbers", "SLEEFPirates", "SpecialFunctions", "Static", "ThreadingUtilities", "UnPack", "VectorizationBase"]
+git-tree-sha1 = "2c7b360d8b620a28c77ff6275f5612d4d6446942"
+uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
+version = "0.12.109"
+
 [[MCMCChains]]
 deps = ["AbstractMCMC", "AxisArrays", "Compat", "Dates", "Distributions", "Formatting", "IteratorInterfaceExtensions", "KernelDensity", "LinearAlgebra", "MCMCDiagnosticTools", "MLJModelInterface", "NaturalSort", "OrderedCollections", "PrettyTables", "Random", "RecipesBase", "Serialization", "Statistics", "StatsBase", "StatsFuns", "TableTraits", "Tables"]
 git-tree-sha1 = "a9e3f4a3460b08dc75870811635b83afbd388ee8"
@@ -1318,6 +1324,11 @@ deps = ["Markdown", "Random"]
 git-tree-sha1 = "3d3e902b31198a27340d0bf00d6ac452866021cf"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 version = "0.5.9"
+
+[[ManualMemory]]
+git-tree-sha1 = "bcaef4fc7a0cfe2cba636d84cda54b5e4e4ca3cd"
+uuid = "d125e4d3-2237-4719-b19c-fa641b8a4667"
+version = "0.1.8"
 
 [[MappedArrays]]
 git-tree-sha1 = "e8b359ef06ec72e8c030463fe02efe5527ee5142"
@@ -1397,6 +1408,12 @@ version = "0.4.10"
 
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
+
+[[NonlinearSolve]]
+deps = ["ArrayInterface", "FiniteDiff", "ForwardDiff", "IterativeSolvers", "LinearAlgebra", "RecursiveArrayTools", "RecursiveFactorization", "Reexport", "SciMLBase", "Setfield", "StaticArrays", "UnPack"]
+git-tree-sha1 = "aeebff6a2a23506e5029fd2248a26aca98e477b3"
+uuid = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
+version = "0.3.16"
 
 [[Observables]]
 git-tree-sha1 = "dfd8d34871bc3ad08cd16026c1828e271d554db9"
@@ -1504,6 +1521,18 @@ git-tree-sha1 = "d457f881ea56bbfa18222642de51e0abf67b9027"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 version = "1.29.0"
 
+[[Polyester]]
+deps = ["ArrayInterface", "BitTwiddlingConvenienceFunctions", "CPUSummary", "IfElse", "ManualMemory", "PolyesterWeave", "Requires", "Static", "StrideArraysCore", "ThreadingUtilities"]
+git-tree-sha1 = "8d95a735921204f5d551ac300b20d802a150433a"
+uuid = "f517fe37-dbe3-4b94-8317-1923a5111588"
+version = "0.6.8"
+
+[[PolyesterWeave]]
+deps = ["BitTwiddlingConvenienceFunctions", "CPUSummary", "IfElse", "Static", "ThreadingUtilities"]
+git-tree-sha1 = "7e597df97e46ffb1c8adbaddfa56908a7a20194b"
+uuid = "1d0040c9-8b98-4ee7-8388-3f51789ca0ad"
+version = "0.1.5"
+
 [[PooledArrays]]
 deps = ["DataAPI", "Future"]
 git-tree-sha1 = "a6062fe4063cdafe78f4a0a81cfffb89721b30e7"
@@ -1587,10 +1616,16 @@ uuid = "01d81517-befc-4cb6-b9ec-a95719d0359c"
 version = "0.5.2"
 
 [[RecursiveArrayTools]]
-deps = ["Adapt", "ArrayInterface", "ChainRulesCore", "DocStringExtensions", "FillArrays", "GPUArrays", "LinearAlgebra", "RecipesBase", "StaticArrays", "Statistics", "ZygoteRules"]
-git-tree-sha1 = "6b25d6ba6361ccba58be1cf9ab710e69f6bc96f8"
+deps = ["Adapt", "ArrayInterface", "ChainRulesCore", "DocStringExtensions", "FillArrays", "LinearAlgebra", "RecipesBase", "Requires", "StaticArrays", "Statistics", "ZygoteRules"]
+git-tree-sha1 = "bfe14f127f3e7def02a6c2b1940b39d0dabaa3ef"
 uuid = "731186ca-8d62-57ce-b412-fbd966d074cd"
-version = "2.27.1"
+version = "2.26.3"
+
+[[RecursiveFactorization]]
+deps = ["LinearAlgebra", "LoopVectorization", "Polyester", "StrideArraysCore", "TriangularSolve"]
+git-tree-sha1 = "a9a852c7ebb08e2a40e8c0ab9830a744fa283690"
+uuid = "f2c3362d-daeb-58d1-803e-2bc74f2840b4"
+version = "0.2.10"
 
 [[Reexport]]
 git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
@@ -1623,18 +1658,35 @@ version = "0.3.0+0"
 
 [[Roots]]
 deps = ["CommonSolve", "Printf", "Setfield"]
-git-tree-sha1 = "30e3981751855e2340e9b524ab58c1ec85c36f33"
+git-tree-sha1 = "e382260f6482c27b5062eba923e36fde2f5ab0b9"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "2.0.1"
+version = "2.0.0"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
+[[SIMDDualNumbers]]
+deps = ["ForwardDiff", "IfElse", "SLEEFPirates", "VectorizationBase"]
+git-tree-sha1 = "62c2da6eb66de8bb88081d20528647140d4daa0e"
+uuid = "3cdde19b-5bb0-4aaf-8931-af3e248e098b"
+version = "0.1.0"
+
+[[SIMDTypes]]
+git-tree-sha1 = "330289636fb8107c5f32088d2741e9fd7a061a5c"
+uuid = "94e857df-77ce-4151-89e5-788b33177be4"
+version = "0.1.0"
+
+[[SLEEFPirates]]
+deps = ["IfElse", "Static", "VectorizationBase"]
+git-tree-sha1 = "ac399b5b163b9140f9c310dfe9e9aaa225617ff6"
+uuid = "476501e8-09a2-5ece-8869-fb82de89a1fa"
+version = "0.6.32"
+
 [[SciMLBase]]
 deps = ["ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "RecipesBase", "RecursiveArrayTools", "StaticArrays", "Statistics", "Tables", "TreeViews"]
-git-tree-sha1 = "8161f13168845aefff8dc193b22e3fcb4d8f91a9"
+git-tree-sha1 = "5420ffd1d5ad49e2c8309efb7338cc2443487029"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "1.31.5"
+version = "1.31.4"
 
 [[ScientificTypesBase]]
 git-tree-sha1 = "a8e18eb383b5ecf1b5e6fc237eb39255044fd92b"
@@ -1743,6 +1795,12 @@ git-tree-sha1 = "43a316e07ae612c461fd874740aeef396c60f5f8"
 uuid = "f3b207a7-027a-5e70-b257-86293d7955fd"
 version = "0.14.34"
 
+[[StrideArraysCore]]
+deps = ["ArrayInterface", "CloseOpenIntervals", "IfElse", "LayoutPointers", "ManualMemory", "Requires", "SIMDTypes", "Static", "ThreadingUtilities"]
+git-tree-sha1 = "d32a1b537a6083697cbdd5af02347d24499f7c6d"
+uuid = "7792a7ef-975c-4747-a70f-980b88e8d1da"
+version = "0.3.5"
+
 [[StructArrays]]
 deps = ["Adapt", "DataAPI", "StaticArrays", "Tables"]
 git-tree-sha1 = "e75d82493681dfd884a357952bbd7ab0608e1dc3"
@@ -1795,6 +1853,12 @@ version = "0.1.5"
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
+[[ThreadingUtilities]]
+deps = ["ManualMemory"]
+git-tree-sha1 = "f8629df51cab659d70d2e5618a430b4d3f37f2c3"
+uuid = "8290d209-cae3-49c0-8002-c8c24d57dab5"
+version = "0.5.0"
+
 [[Tracker]]
 deps = ["Adapt", "DiffRules", "ForwardDiff", "LinearAlgebra", "LogExpFunctions", "MacroTools", "NNlib", "NaNMath", "Printf", "Random", "Requires", "SpecialFunctions", "Statistics"]
 git-tree-sha1 = "0874c1b5de1b5529b776cfeca3ec0acfada97b1b"
@@ -1812,6 +1876,12 @@ deps = ["Test"]
 git-tree-sha1 = "8d0d7a3fe2f30d6a7f833a5f19f7c7a5b396eae6"
 uuid = "a2a6695c-b41b-5b7d-aed9-dbfdeacea5d7"
 version = "0.3.0"
+
+[[TriangularSolve]]
+deps = ["CloseOpenIntervals", "IfElse", "LayoutPointers", "LinearAlgebra", "LoopVectorization", "Polyester", "Static", "VectorizationBase"]
+git-tree-sha1 = "b8d08f55b02625770c09615d96927b3a8396925e"
+uuid = "d5829a12-d9aa-46ab-831f-fb7c9ab06edf"
+version = "0.1.11"
 
 [[Turing]]
 deps = ["AbstractMCMC", "AdvancedHMC", "AdvancedMH", "AdvancedPS", "AdvancedVI", "BangBang", "Bijectors", "DataStructures", "Distributions", "DistributionsAD", "DocStringExtensions", "DynamicPPL", "EllipticalSliceSampling", "ForwardDiff", "Libtask", "LinearAlgebra", "MCMCChains", "NamedArrays", "Printf", "Random", "Reexport", "Requires", "SciMLBase", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Tracker", "ZygoteRules"]
@@ -1846,6 +1916,12 @@ version = "0.4.1"
 git-tree-sha1 = "34db80951901073501137bdbc3d5a8e7bbd06670"
 uuid = "41fe7b60-77ed-43a1-b4f0-825fd5a5650d"
 version = "0.1.2"
+
+[[VectorizationBase]]
+deps = ["ArrayInterface", "CPUSummary", "HostCPUFeatures", "Hwloc", "IfElse", "LayoutPointers", "Libdl", "LinearAlgebra", "SIMDTypes", "Static"]
+git-tree-sha1 = "ff34c2f1d80ccb4f359df43ed65d6f90cb70b323"
+uuid = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
+version = "0.21.31"
 
 [[Wayland_jll]]
 deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Pkg", "XML2_jll"]
@@ -2131,71 +2207,71 @@ version = "0.9.1+5"
 """
 
 # ╔═╡ Cell order:
-# ╠═b386b080-d22e-11ec-0228-f357eef26cf5
-# ╠═4861f327-812a-4cc1-9340-9196743b1e0f
-# ╠═8c9a9d91-5b09-4b20-b29b-310b9d4aac87
-# ╠═9ded67cd-5e48-484e-b802-2349412357d7
-# ╠═3c1e18dc-1f18-48db-a2d2-32cd5938a21c
-# ╠═417d35d8-f95e-49f1-b190-b4e32c2347e0
-# ╠═053dbf13-a93d-4bff-aa26-7164c034c145
-# ╠═11567af4-16b1-4e42-a142-da20324d54d9
-# ╠═0217024b-5160-4272-89f8-ddee02d53efe
-# ╠═e7ee19e2-beb9-4da6-9a18-25834f3e47d2
-# ╠═16692ff5-3092-4eed-966e-d3fd6f5e8821
-# ╠═30482cda-e17a-422a-ae59-182913bc5276
-# ╠═d0a6b97a-6010-4594-86b6-20153adae121
-# ╠═aa1360ad-c4aa-4937-856c-6a7315269849
-# ╠═79bffd3c-43a5-4290-be11-29e0a8e798d2
-# ╠═ca127646-0943-491c-9d71-a7775deda2fd
-# ╠═018ae366-7319-4a45-9692-5bcc6ced8f47
-# ╠═ed6160be-cc82-4b98-aeec-7b053493ac7f
-# ╠═75358f9b-1545-484c-98c6-d021e358fdc2
-# ╠═bc7e2583-bef5-426f-9f9c-ca41a99159ff
-# ╠═e6194ff0-5439-49c8-b0d2-72e6c208df60
-# ╠═3874a84c-851a-4cfe-9b0e-4425148c4d79
-# ╠═25d997aa-63ad-40b1-aa3f-2191268b313e
-# ╠═a6175163-760d-476c-b0f5-a794bfb62b37
-# ╠═5e2fb4e5-df2b-4e85-bb43-1db5a20f8a22
-# ╠═115c5252-efac-4d9f-80a6-5b9046a01a6b
-# ╠═9efb9a56-f6ba-4db8-a28a-73b8ef9d1ad5
-# ╠═bfe19066-53b7-4e10-85f5-538095c6b392
-# ╠═85ccd5fb-34c4-4c01-afeb-6448bcc1416e
-# ╠═57be7575-1298-4a00-8ace-316af43e4c7f
-# ╠═fbb43ee0-8d6a-4592-b084-01951efd5623
-# ╠═1d1c58f1-e155-4dfb-bb1c-6de40123d780
-# ╠═e18284fc-d46e-4a74-ae26-b23cafcd2a8a
-# ╠═402c2f4f-5628-4f28-96f4-026c52d7706e
-# ╠═7f8ce4f5-0446-4405-9632-3cc85adc44d8
-# ╠═8cbf2ac8-441e-4583-b0ca-76f45c09a6dc
-# ╠═9760dc4c-d579-45a4-abe6-9a5493b4062f
-# ╠═9e7f7dba-67bf-41bb-965a-2dbf71dd10fd
-# ╠═2c700738-8c62-4e9d-9a11-5462e94bb483
-# ╠═6ff70e77-c4fc-4a90-adb9-8195c785d8f4
-# ╠═0aa7a06d-bc11-4a56-9a2c-780249fda01e
-# ╠═57def3b2-83dc-4dc6-821e-00313e6ef9bd
-# ╠═65e3f7e1-b3c7-4646-918d-f1b95df3a7b7
-# ╠═73f99cba-508d-45da-ac8c-738a113f186d
-# ╠═1da71409-b93f-4375-85a7-56f8ed09a314
-# ╠═e6b7b322-d8a9-41ba-b799-8f1d0eeaa075
-# ╠═e4a5c1b8-1205-499f-8431-438e4990ff1b
-# ╠═0dc34623-9727-4248-8a79-61816a56daf7
-# ╠═203dd802-c08a-463c-8d25-d749bb992b32
-# ╠═84a76a77-ac19-4874-b37f-28ff12a9735e
-# ╠═4c1ee6c9-ecac-4a55-bae5-aac10522da26
-# ╠═c0baeace-61a1-4c71-9860-1c1b47b85575
-# ╠═59fc0870-43ef-43d8-be26-80d02b8553c0
-# ╠═3cda4ea0-e825-48ae-a93a-74fb802784d4
-# ╠═f6d39e0a-2598-46f4-b285-006ed5dba4e5
-# ╠═7f127393-c491-42eb-8097-fe11f4530b62
-# ╠═987a3631-dcc0-44c6-ac58-fd55eab95848
-# ╠═4adfa5ae-f4bd-44f7-983b-ea7a1e24de53
-# ╠═90ee9872-8679-465f-991c-d575ff3d2708
-# ╠═90fb2704-de9a-4026-9826-1f09de08fc64
-# ╠═2d0d20d1-4bac-4555-a513-c12ef9103fa6
-# ╠═285020d8-7fb6-4077-8ea9-cdc6f858db1d
-# ╠═5c98cfae-91fb-40d5-a8d9-fb8791ff3745
-# ╠═4f09e31b-ebf5-4658-8db6-93aae7fb23a8
-# ╠═5fb0ccee-0605-4a05-b828-7d18da1170a4
-# ╠═42da9707-e082-4d10-8981-f3c3d117e53b
+# ╠═aadbfa5c-156a-4daa-af0b-d143e353a7c9
+# ╠═596989bf-dd8f-4538-bc1f-f3b0430b6110
+# ╠═7c27b210-2432-4155-b58f-13dd998bb80a
+# ╠═ac083b1c-2ada-4656-baca-7ba52e36383f
+# ╠═b220c5ca-137d-48c8-8b57-a8aac87ba6db
+# ╠═4daea8a6-25eb-4a25-81cb-231546595421
+# ╠═740542e6-e151-4ac4-8784-c3dece5c4e3c
+# ╠═96de9b31-0763-49ad-9e3f-ee20877ff3c2
+# ╠═ac6981fb-f177-4994-adf9-b230f482bc70
+# ╠═845ccaa3-1555-4d39-84d4-65863c7b4d11
+# ╠═97215926-f1fe-45a3-8934-2e363c0f7a04
+# ╠═6ff337a3-8a80-45b0-8e20-ceb980f1625f
+# ╠═768ace98-da5f-4c92-a8a5-3b4f2be828ce
+# ╠═21f2dbe0-2743-4e9b-aede-1ad9a7e280b2
+# ╠═ece2601c-95aa-4ed7-92ef-8df9cf58733c
+# ╠═a0ddfb63-b07e-4d93-9c12-2aec248e1d71
+# ╠═3906a770-9bce-47b9-a8cf-986c224e8a77
+# ╠═f7732e8f-2c03-4432-85fb-d62f1760008a
+# ╠═ae53efb6-7630-49c9-9a3e-38aa3ba7a79c
+# ╠═f4b0cb27-dedc-43ab-b898-1f6ff0c008a8
+# ╠═0f22da9f-4aa7-4c64-b531-a0ad9e38805b
+# ╠═bc8a8c1d-e798-463f-be71-6253443c1365
+# ╠═146e2ed5-5cef-4b57-b7d7-e47d691b7d60
+# ╠═e1ae5c56-223d-4bf4-b051-5c5fb228982b
+# ╠═9448f0e6-05ab-40c4-9ab8-7995cc60a766
+# ╠═db111abd-2f70-4480-8713-64bb635ca39f
+# ╠═f736b21c-4e9f-42de-b6e3-27db27192d97
+# ╠═c1eab131-f2ff-40b3-9602-d3e57b053d31
+# ╠═7f54b279-5724-4ed9-97f4-f413e4d89772
+# ╠═c0a06916-9b06-4b55-b086-020e83dc247b
+# ╠═f1833ae9-3958-4d60-8d8e-c8cb061bfcd2
+# ╠═221faf04-1685-4e86-9b34-dc13a2b94ea1
+# ╠═83f9c20f-4f09-4fa8-833b-73654fcb2ecd
+# ╠═0267c013-6f89-4ff1-a359-d5a6b80cf149
+# ╠═fb8df528-9f82-43a0-9200-7364edbbc426
+# ╠═7e579703-0737-4107-a928-1427d6fa0687
+# ╠═9e0ee95d-8026-41a7-8591-1e26ef01dfe5
+# ╠═63f8e00a-3eeb-4f0f-824a-63451bc8f207
+# ╠═040360f8-13f9-4163-863c-77a42b19123b
+# ╠═2ce77ef6-242b-4e9b-8e55-6baf0fbb10cd
+# ╠═9acd0ee3-a62b-440b-9303-b64d4e31a954
+# ╠═c7a2fa72-d888-4a10-b594-bd9b23a6ce72
+# ╠═4cdf84e3-d724-42d5-a0a8-7e353c397918
+# ╠═59e6fe84-9252-489c-927c-0fc6839e28d4
+# ╠═ca70c75b-29f9-4c9d-a94b-50c2475d95a3
+# ╠═bc5ceb87-d1b7-4aa7-a9b3-570ac8260bfc
+# ╠═9971f0e6-0d7b-4db6-a490-b76477f19b6e
+# ╠═9ce7d179-463a-4503-8724-0bae657605aa
+# ╠═60314612-f4df-487f-8847-7856d0ccc05d
+# ╠═e603609f-9d6e-415a-96fa-14bf0ec1b414
+# ╠═5344065e-be62-4b08-a08a-8592028cc53e
+# ╠═a0097a65-1ca6-4b48-b39d-18ac0c39b6a7
+# ╠═732ba7fd-c7a0-44f8-9655-8e5f0574fd32
+# ╠═c7a30ded-5b9e-4c39-ad27-605e0ce6c5d5
+# ╠═c1e3618d-dfc0-478b-97d7-f73ead71fcf2
+# ╠═35f754a6-7579-4ff3-8381-34c03c296d97
+# ╠═23b41eae-2726-4cf2-a108-52fc0c6f2f35
+# ╠═6a1b928e-7263-4d2d-a226-1ba75740f4cb
+# ╠═3cf56bec-f224-4518-982b-ab141ec9a684
+# ╠═d432a474-562c-49ba-ae43-295acbb8d748
+# ╠═2a1b52ee-0d37-43dc-93de-a436f98a9b38
+# ╠═a21171ca-0f2b-49b5-9fe5-227412fc6679
+# ╠═17b71a70-6df1-477d-8215-e987337efa2e
+# ╠═51ff8bbe-034a-4bcb-915e-727b18ff5c28
+# ╠═3c434b3c-be5b-438b-9bf9-d8144449731d
+# ╠═a9abaa3d-9c82-4384-8498-f3181d732419
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
