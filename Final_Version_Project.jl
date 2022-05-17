@@ -59,16 +59,16 @@ end
 #sample#
 
 # ╔═╡ 97215926-f1fe-45a3-8934-2e363c0f7a04
-file_contents_vert=CSV.read("C:\\Users\\Mahek\\OneDrive\\Desktop\\BME 502\\DataForFinal_vert.csv", DataFrame);
+file_contents_vert=CSV.read("C:\\Users\\Mahek\\OneDrive\\Desktop\\BME 502\\DataForFinal_vert.csv", DataFrame) #Import Data Set
 
 # ╔═╡ 6ff337a3-8a80-45b0-8e20-ceb980f1625f
-file_contents_hor=CSV.read("C:\\Users\\Mahek\\OneDrive\\Desktop\\BME 502\\DataForFinal_hor.csv", DataFrame);
+file_contents_hor=CSV.read("C:\\Users\\Mahek\\OneDrive\\Desktop\\BME 502\\DataForFinal_hor.csv", DataFrame) #Import Data Set in alternate layout
 
 # ╔═╡ 768ace98-da5f-4c92-a8a5-3b4f2be828ce
-file_contents=copy(file_contents_vert)
+file_contents=copy(file_contents_vert) #set data set to the layout easiest to group datasets by
 
 # ╔═╡ 21f2dbe0-2743-4e9b-aede-1ad9a7e280b2
-file_contents_no_outliers=copy(file_contents_vert)
+file_contents_no_outliers=copy(file_contents_vert) #Duplicate data set so any changes arent made to orig data set 
 
 # ╔═╡ ece2601c-95aa-4ed7-92ef-8df9cf58733c
 #=
@@ -87,22 +87,23 @@ begin
 end
 
 # ╔═╡ 3906a770-9bce-47b9-a8cf-986c224e8a77
-normalized_file_contents=copy(file_contents)
+normalized_file_contents=copy(file_contents) #duplicate data set so a normalized and unnormalized set can exist
 
 # ╔═╡ f7732e8f-2c03-4432-85fb-d62f1760008a
-normalized_file_contents[:,:B_actin]=normalized_file_contents[:,:B_actin]/max_b_actin
+normalized_file_contents[:,:B_actin]=normalized_file_contents[:,:B_actin]/max_b_actin #normalize beta actin
 
 # ╔═╡ ae53efb6-7630-49c9-9a3e-38aa3ba7a79c
-normalized_file_contents[:,:Pink_1]=normalized_file_contents[:,:B_actin].*normalized_file_contents[:,:Pink_1]
+normalized_file_contents[:,:Pink_1]=normalized_file_contents[:,:B_actin].*normalized_file_contents[:,:Pink_1] #normalize pink-1
 
 # ╔═╡ f4b0cb27-dedc-43ab-b898-1f6ff0c008a8
-normalized_file_contents
+normalized_file_contents #display normalized_file_contents
 
 # ╔═╡ 0f22da9f-4aa7-4c64-b531-a0ad9e38805b
-grouped_trials=groupby(normalized_file_contents,:SampleType)
+grouped_trials=groupby(normalized_file_contents,:SampleType) #group normalized data by sample type
 
 # ╔═╡ bc8a8c1d-e798-463f-be71-6253443c1365
 begin
+	#extract control values and assign to new vectors
 	Pink_control=grouped_trials[("C",)].Pink_1
 	B_actin_control=grouped_trials[("C",)].B_actin
 	Abs_control=grouped_trials[("C",)].Absorbance
@@ -110,6 +111,7 @@ end
 
 # ╔═╡ 146e2ed5-5cef-4b57-b7d7-e47d691b7d60
 begin
+	#extract h202 100 values and assign to new vectors
 	Pink_h2o2_100=grouped_trials[("100",)].Pink_1
 	B_actin_h2o2_100=grouped_trials[("100",)].B_actin
 	Abs_h2o2_100=grouped_trials[("100",)].Absorbance
@@ -117,6 +119,7 @@ end
 
 # ╔═╡ e1ae5c56-223d-4bf4-b051-5c5fb228982b
 begin
+	#extract h202 200 values and assign to new vectors
 	Pink_h2o2_200=grouped_trials[("200",)].Pink_1
 	B_actin_h2o2_200=grouped_trials[("200",)].B_actin
 	Abs_h2o2_200=grouped_trials[("200",)].Absorbance
@@ -124,12 +127,14 @@ end
 
 # ╔═╡ 9448f0e6-05ab-40c4-9ab8-7995cc60a766
 begin
+	#initialize arrays that would hold maximum pink and beta actin values 
 	max_pink_values=[]
 	max_beta_actin_values=[]
 end
 
 # ╔═╡ db111abd-2f70-4480-8713-64bb635ca39f
 begin
+	#add maximum pink values to array initialzed above
 	push!(max_pink_values,maximum(Pink_control))
 	push!(max_pink_values,maximum(Pink_h2o2_100))
 	push!(max_pink_values,maximum(Pink_h2o2_200))
@@ -137,6 +142,7 @@ end
 
 # ╔═╡ f736b21c-4e9f-42de-b6e3-27db27192d97
 begin
+	#add maximum beta values to array initialzed above
 	push!(max_beta_actin_values,maximum(B_actin_control))
 	push!(max_beta_actin_values,maximum(B_actin_h2o2_100))
 	push!(max_beta_actin_values,maximum(B_actin_h2o2_200))
@@ -144,18 +150,21 @@ end
 
 # ╔═╡ c1eab131-f2ff-40b3-9602-d3e57b053d31
 begin
+	#tripple max values 
 	triple_max_pink_values=max_pink_values.*3
 	triple_max_beta_actin_values=max_beta_actin_values.*3
 end
 
 # ╔═╡ 7f54b279-5724-4ed9-97f4-f413e4d89772
 begin
+	#initalize arrays that would hold std values for pink and beta actin
 	std_pink_values=[]
 	std_beta_actin_values=[]
 end
 
 # ╔═╡ c0a06916-9b06-4b55-b086-020e83dc247b
 begin
+	#add pink std values to array
 	push!(std_pink_values,std(Pink_control))
 	push!(std_pink_values,std(Pink_h2o2_100))
 	push!(std_pink_values,std(Pink_h2o2_200))
@@ -163,6 +172,7 @@ end
 
 # ╔═╡ f1833ae9-3958-4d60-8d8e-c8cb061bfcd2
 begin
+	#add beta actin std values to array
 	push!(std_beta_actin_values,std(B_actin_control))
 	push!(std_beta_actin_values,std(B_actin_h2o2_100))
 	push!(std_beta_actin_values,std(B_actin_h2o2_200))
@@ -170,19 +180,20 @@ end
 
 # ╔═╡ 221faf04-1685-4e86-9b34-dc13a2b94ea1
 begin
+	#double std values
 	std_double_pink=std_pink_values.*2
 	std_double_beta_actin=std_beta_actin_values.*2
 end
 
 # ╔═╡ 83f9c20f-4f09-4fa8-833b-73654fcb2ecd
-@model function normal_fit(data,index,triple_avg,double_std)
+@model function normal_fit(data,index,triple_avg,double_std) #create model for normal fits
 	μ ~ Uniform(0,triple_avg[index])
 	σ ~ Uniform(0,double_std[index])
     data ~ MvNormal(Fill(μ,length(data)),σ)
 end
 
 # ╔═╡ 0267c013-6f89-4ff1-a359-d5a6b80cf149
-function distr_det(data,index,triple_avg,double_std)
+function distr_det(data,index,triple_avg,double_std) #simpulate a data set and calculate its mean and std 
 	means=[]
 	sigmas=[]
 	model1 = normal_fit(data,index,triple_avg,double_std)
@@ -194,18 +205,18 @@ function distr_det(data,index,triple_avg,double_std)
 end
 
 # ╔═╡ fb8df528-9f82-43a0-9200-7364edbbc426
-function get_mu_sigma(data,index,z_abs,tripple_avg,double_std)
+function get_mu_sigma(data,index,z_abs,tripple_avg,double_std) #used by create_list_of_outliers
 	means, sigmas=distr_det(data,index,triple_avg,double_std)
 	z=[-z_abs,z_abs]
 	x=z.*sigmas[1].+means[1]
 	plot(Normal(means[1],sigmas[1]))
-	pos_cutoff=	erf(z[2]/sqrt(2)/2)
+	pos_cutoff=	SF.erf(z[2]/sqrt(2)/2)
 	neg_cutoff=1-pos_cutoff
 	return x, means, sigmas
 end
 
 # ╔═╡ 7e579703-0737-4107-a928-1427d6fa0687
-function create_list_of_outliers(data,index,z_abs,triple_avg,double_std)
+function create_list_of_outliers(data,index,z_abs,triple_avg,double_std) #creates list of outliers
 	x, means, sigmas =get_mu_sigma(data,index,z_abs,triple_avg,double_std)
 	outliers=[]
 	for i=1:length(data)
@@ -217,7 +228,7 @@ function create_list_of_outliers(data,index,z_abs,triple_avg,double_std)
 end
 
 # ╔═╡ 9e0ee95d-8026-41a7-8591-1e26ef01dfe5
-function MLE(data,index,triple_avg,double_std)
+function MLE(data,index,triple_avg,double_std) #calcultes the Macimum likelyhoods of data 
 	means, sigmas = distr_det(data,index,triple_avg,double_std)
 	likelyhoods=zeros(length(data))
 	area_under_curve=zeros(length(data))
@@ -292,19 +303,19 @@ function remove_each_data_point_ind(data,index,triple_avg,double_std)
 end
 
 # ╔═╡ 4cdf84e3-d724-42d5-a0a8-7e353c397918
-MLE(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
+MLE(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)#calls MLE function
 
 # ╔═╡ 59e6fe84-9252-489c-927c-0fc6839e28d4
-remove_data_below_threshold(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin,0.05)
+remove_data_below_threshold(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin,0.05)#removes data below threshold of .05; NOT used
 
 # ╔═╡ ca70c75b-29f9-4c9d-a94b-50c2475d95a3
-exp.(likleyhoods_after_below_threshold[1])
+exp.(likleyhoods_after_below_threshold[1]) #calculate display non-log lielyhoods
 
 # ╔═╡ bc5ceb87-d1b7-4aa7-a9b3-570ac8260bfc
-remove_each_data_point_ind(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin)
+remove_each_data_point_ind(B_actin_h2o2_200,3,triple_max_beta_actin_values,std_double_beta_actin) #removes data based on its MLE
 
 # ╔═╡ 9971f0e6-0d7b-4db6-a490-b76477f19b6e
-function get_final_data_set(b_actin_data,pink_data,index,triple_avg,double_std)
+function get_final_data_set(b_actin_data,pink_data,index,triple_avg,double_std) #calls prevous function (remove_each_data_point_ind) and exports the final data sets 
 	likleyhoods_after_each_data_is_removed, MLE_outputs_after_each_data_is_removed =remove_each_data_point_ind(b_actin_data,index,triple_avg,double_std)
 	mean_MLE=mean(MLE_outputs_after_each_data_is_removed);
 	index_to_remove=[]
@@ -320,35 +331,35 @@ function get_final_data_set(b_actin_data,pink_data,index,triple_avg,double_std)
 end
 
 # ╔═╡ 9ce7d179-463a-4503-8724-0bae657605aa
-new_b_actin_100, new_pink_100 = get_final_data_set(B_actin_h2o2_100,Pink_h2o2_100, 2,triple_max_beta_actin_values,std_double_beta_actin)
+new_b_actin_100, new_pink_100 = get_final_data_set(B_actin_h2o2_100,Pink_h2o2_100, 2,triple_max_beta_actin_values,std_double_beta_actin) #generates new h2o2 100 data sets
 
 # ╔═╡ 60314612-f4df-487f-8847-7856d0ccc05d
-new_b_actin_200, new_pink_200 = get_final_data_set(B_actin_h2o2_200,Pink_h2o2_200, 3,triple_max_beta_actin_values,std_double_beta_actin)
+new_b_actin_200, new_pink_200 = get_final_data_set(B_actin_h2o2_200,Pink_h2o2_200, 3,triple_max_beta_actin_values,std_double_beta_actin) #generates new h2o2 200 data sets
 
 # ╔═╡ e603609f-9d6e-415a-96fa-14bf0ec1b414
 MLE_outputs_after_below_threshold
 
 # ╔═╡ 5344065e-be62-4b08-a08a-8592028cc53e
-UnequalVarianceTTest(Pink_control, new_pink_100)
+UnequalVarianceTTest(Pink_control, new_pink_100) #t-test for pink 100 agains control; used in Bayses factor calculation below
 
 # ╔═╡ a0097a65-1ca6-4b48-b39d-18ac0c39b6a7
-UnequalVarianceTTest(Pink_control, new_pink_200)
+UnequalVarianceTTest(Pink_control, new_pink_200) #t-test for pink 200 agains control; used in Bayses factor calculation below
 
 # ╔═╡ 732ba7fd-c7a0-44f8-9655-8e5f0574fd32
 #= This array was created by running the above test for both experimental groups. It is used to perform the bayesian t-test according to the documentation on the Pingouin package. https://docs.juliahub.com/Pingouin/Lh7T4/0.2.2/bayesian/#Pingouin.bayesfactor_ttest =#
 
 # ╔═╡ c7a30ded-5b9e-4c39-ad27-605e0ce6c5d5
-t_test_results = [1.0393001576378293, -0.5444702558177372]
+t_test_results = [1.0393001576378293, -0.5444702558177372] #array of t test reults
 
 # ╔═╡ c1e3618d-dfc0-478b-97d7-f73ead71fcf2
-@model function normal_fit_no_index(data,triple_avg,double_std)
+@model function normal_fit_no_index(data,triple_avg,double_std) #same function as normal_fit but without the index argument
 	μ ~ Uniform(0,triple_avg)
 	σ ~ Uniform(0,double_std)
     data ~ MvNormal(Fill(μ,length(data)),σ)
 end
 
 # ╔═╡ 35f754a6-7579-4ff3-8381-34c03c296d97
-function distr_det_no_index(data,index,triple_avg,double_std)
+function distr_det_no_index(data,index,triple_avg,double_std) #same function as distr_det but without the index argument
 	means=[]
 	sigmas=[]
 	max1 = 3* maximum(data)
@@ -383,23 +394,23 @@ begin
 end
 
 # ╔═╡ 2a1b52ee-0d37-43dc-93de-a436f98a9b38
-function find_bayes_factor(data1, data2, index)
+function find_bayes_factor(data1, data2, index) #function that calulates bayes factor
 	size_1 = length(data1)
 	size_2 = length(data2)
 	pg.bayesfactor_ttest(t_test_results[index], size_1, size_2)
 end 
 
 # ╔═╡ a21171ca-0f2b-49b5-9fe5-227412fc6679
-bf1 = find_bayes_factor(Pink_control, new_pink_100, 1)
+bf1 = find_bayes_factor(Pink_control, new_pink_100, 1) #bayes factor for pink 100
 
 # ╔═╡ 17b71a70-6df1-477d-8215-e987337efa2e
-bf2 = find_bayes_factor(Pink_control, new_pink_200, 2)
+bf2 = find_bayes_factor(Pink_control, new_pink_200, 2) #bayes factor for pink 200
 
 # ╔═╡ 51ff8bbe-034a-4bcb-915e-727b18ff5c28
-log10(bf1)
+log10(bf1) #log of bf 1 to compare against wikipedia table
 
 # ╔═╡ 3c434b3c-be5b-438b-9bf9-d8144449731d
-log10(bf2)
+log10(bf2) #log of bf 2 to compare against wikipedia table
 
 # ╔═╡ a9abaa3d-9c82-4384-8498-f3181d732419
 #= The above results show that neither experimental group are significantly different than the control. We are interpreting this based on the chart in the follwing link which says that a bayes factor under 1 is not significant.
